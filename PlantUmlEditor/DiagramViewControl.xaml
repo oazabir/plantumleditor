@@ -1,0 +1,111 @@
+﻿<UserControl x:Class="PlantUmlEditor.DiagramViewControl"
+xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_DataContextChanged">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <plantuml:UriToCachedImageConverter x:Key="uriToImageConverter" />
+      
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Artifacts\Icons.xaml"/>
+        <ResourceDictionary Source="Skins\Black\BlackResources.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>  
+  </UserControl.Resources>
+  
+  <Border x:Name="WorkingPanel" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Style="{DynamicResource BorderStyle}" BorderBrush="{x:Null}" CornerRadius="0,0,0,0">
+    <Grid Height="Auto">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="200" />
+        <RowDefinition Height="36" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+      
+      <avalonEdit:TextEditor 
+      x:Name="ContentEditor" 
+      Grid.Row="0" 
+      HorizontalAlignment="Stretch" 
+      VerticalAlignment="Stretch" 
+      FontFamily="Consolas" 
+      FontSize="11pt"
+      Background="Black"
+      Foreground="LightYellow"
+      Opacity="0.8"
+      Text=""
+      Padding="10"
+      TextChanged="ContentEditor_TextChanged">        
+      </avalonEdit:TextEditor>
+      
+      <Border Grid.Row="1" 
+      Background="Black" 
+      Opacity="0.8">
+        <WrapPanel Margin="4">
+          <Button Style="{DynamicResource BlackButtonStyle}" 
+          Height="Auto" 
+          x:Name="SaveDiagram" 
+          Padding="20, 0, 20, 0" 
+          Click="SaveDiagram_Click" >_Save &amp; Refresh</Button>
+          <TextBlock Width="10" ></TextBlock>
+          <Button Style="{DynamicResource RedButtonStyle}" 
+          Height="Auto" 
+          x:Name="AddStuff" 
+          Width="Auto" 
+          Padding="20, 0, 20, 0"
+          Click="AddStuff_Click" 
+          Content="_Add..." >
+            <Button.ContextMenu>
+              <ContextMenu x:Name="AddContextMenu" Style="{DynamicResource ContextMenuStyle}">                
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Use Case">
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="New use case" Tag="usecase (Last\nusecase) as UC4" Click="MenuItem_Click"></MenuItem>
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="New Actor" Tag="actor :Last actor: as Men4"  Click="MenuItem_Click"></MenuItem>
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Extend Process"></MenuItem>
+                </MenuItem>
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Sequence">
+                </MenuItem>
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Activity">
+                </MenuItem>
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Class">
+                </MenuItem>                
+              </ContextMenu>
+            </Button.ContextMenu>
+          </Button>
+          <TextBlock Width="10" ></TextBlock>
+          <Button Style="{DynamicResource BlackButtonStyle}" 
+          Height="Auto" 
+          x:Name="CloseDiagram" 
+          Padding="20, 0, 20, 0" 
+          Click="CloseDiagram_Click">_Close</Button>
+          <TextBlock Width="10" ></TextBlock>
+          <CheckBox x:Name="AutoRefreshCheckbox"
+          VerticalAlignment="Center" 
+          IsChecked="True" >
+            <TextBlock >Auto Refresh every</TextBlock>
+          </CheckBox>
+          <TextBlock Width="10" ></TextBlock>
+          <TextBox VerticalAlignment="Center" 
+          MaxWidth="30"
+          x:Name="RefreshSecondsTextBox">5</TextBox>
+          <TextBlock VerticalAlignment="Center" > Seconds</TextBlock>
+        </WrapPanel>
+      </Border>
+      <Border Grid.Row="2" ScrollViewer.CanContentScroll="True" 
+      ScrollViewer.HorizontalScrollBarVisibility="Visible" 
+      ScrollViewer.VerticalScrollBarVisibility="Visible">
+        <ScrollViewer HorizontalAlignment="Stretch" 
+        VerticalAlignment="Stretch" 
+        CanContentScroll="True" 
+        HorizontalScrollBarVisibility="Auto" 
+        VerticalScrollBarVisibility="Auto"
+        Background="Black" 
+        Opacity="0.9" >
+          <Image x:Name="DiagramImage" 
+          HorizontalAlignment="Left" 
+          VerticalAlignment="Top"
+          Source="{Binding Path=ImageFilePath, Mode=OneWay, Converter={StaticResource uriToImageConverter}}" 
+          Stretch="None" ></Image>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </Border>
+</UserControl>

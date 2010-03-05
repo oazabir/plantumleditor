@@ -1,0 +1,22 @@
+@startuml img/classes04.png
+
+abstract class AbstractList
+abstract AbstractCollection
+interface List
+interface Collection
+
+List <|-- AbstractList
+Collection <|-- AbstractCollection
+
+Collection <|- List
+AbstractCollection <|- AbstractList <|-- ArrayList
+
+ArrayList : Object[] elementData
+ArrayList : size()
+
+enum TimeUnit
+TimeUnit : DAYS
+TimeUnit : HOURS
+TimeUnit : MINUTES
+
+@enduml

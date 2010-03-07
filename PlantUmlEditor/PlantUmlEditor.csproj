@@ -103,8 +103,6 @@
     <Compile Include="DiagramViewControl.xaml.cs">
       <DependentUpon>DiagramViewControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Helper\BackgroundWork.cs" />
-    <Compile Include="Helper\OldWindow.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -158,30 +156,65 @@
     <None Include="Skins\Black\.svn\text-base\BlackResources.xaml.svn-base" />
     <None Include="Skins\Black\.svn\text-base\SPO3.ico.svn-base" />
     <None Include="Thirdparty\ICSharpCode.AvalonEdit.shfb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Artifacts\Icons.xml" />
-    <Resource Include="Skins\Black\bg_blue.JPG" />
     <Resource Include="Skins\Black\bg_green.JPG" />
-    <Resource Include="Skins\Black\bg_red.JPG" />
-    <Resource Include="Skins\Black\SPO3.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Thirdparty\ICSharpCode.AvalonEdit.dll">
+    <Content Include="samples\img\activity_img20.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\img\classes04.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\img\component_img04.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\img\sequence_img014.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\img\state_img03.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\img\usecase_img07.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\sample activity.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\sample class.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\sample component.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\sample sequence.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\sample state.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="samples\sample use case.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Thirdparty\ICSharpCode.AvalonEdit.dll">
     </Content>
     <Content Include="Thirdparty\ICSharpCode.AvalonEdit.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Resource Include="Thirdparty\ICSharpCode.AvalonEdit.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Content Include="Thirdparty\plantuml.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{573D5F8C-4C19-42C3-B84B-BC585008B505}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Artifacts\.svn\prop-base\" />

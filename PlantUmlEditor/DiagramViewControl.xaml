@@ -34,7 +34,8 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
       Opacity="0.8"
       Text=""
       Padding="10"
-      TextChanged="ContentEditor_TextChanged">        
+      TextChanged="ContentEditor_TextChanged"       
+      >        
       </avalonEdit:TextEditor>
       
       <Border Grid.Row="1" 
@@ -57,15 +58,446 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
             <Button.ContextMenu>
               <ContextMenu x:Name="AddContextMenu" Style="{DynamicResource ContextMenuStyle}">                
                 <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Use Case">
-                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="New use case" Tag="usecase (Last\nusecase) as UC4" Click="MenuItem_Click"></MenuItem>
-                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="New Actor" Tag="actor :Last actor: as Men4"  Click="MenuItem_Click"></MenuItem>
-                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Extend Process"></MenuItem>
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Actor">
+                    <MenuItem.Tag>
+                      <![CDATA[
+actor :Last actor: as Men << Human >>
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Usecase">
+                    <MenuItem.Tag>
+                      <![CDATA[
+(Use the application) as (Use) << Main >>
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Actor to Usecase">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Men -> (Start) : Some Label
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Actor to Usecase (long arrow)">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Men --> (Use the application) : A small label
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Actor Extends Actor">
+                    <MenuItem.Tag>
+                      <![CDATA[
+User <|-- Admin
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Usecase extends Usecase">
+                    <MenuItem.Tag>
+                      <![CDATA[
+(Start) <|-- (Use)
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Note beside usecase">
+                    <MenuItem.Tag>
+                      <![CDATA[
+note right of (Use)\r
+  A note can also\r
+  be on several lines\r
+end note
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
                 </MenuItem>
+                
                 <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Sequence">
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Actor">
+                    <MenuItem.Tag>
+                      <![CDATA[actor Bob]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Participant">
+                    <MenuItem.Tag>
+                      <![CDATA[participant "Multiline\nTitle" as P1 <<stereotype>>]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Synchronous Request">
+                    <MenuItem.Tag>
+                      <![CDATA[Alice -> Bob: Authentication Request]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Return Message">
+                    <MenuItem.Tag>
+                      <![CDATA[Bob --> Alice: Authentication Response]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Self Signal">
+                    <MenuItem.Tag>
+                      <![CDATA[Alice -> Alice: This is a signal to self.\nIt also demonstrates\nmultiline \ntext]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Activation Block">
+                    <MenuItem.Tag>
+                      <![CDATA[User -> A: DoWork\r
+	activate A\r
+	A -> B: << createRequest >>\r
+	A --> User: Return response\r                  
+	deactivate A]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Destroy">
+                    <MenuItem.Tag>
+                      <![CDATA[activate C\r
+    \r
+destroy C]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Alternate Block">
+                    <MenuItem.Tag>
+                      <![CDATA[Alice -> Bob: Authentication Request\r
+alt successful case\r
+    Bob -> Alice: Authentication Accepted\r
+else some kind of failure\r
+    Bob -> Alice: Authentication Failure\r
+end]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Optional">
+                    <MenuItem.Tag>
+                      <![CDATA[opt\r
+	loop 1000 times\r
+		Alice -> Bob: DNS Attack\r
+	end\r
+end]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Loop">
+                    <MenuItem.Tag>
+                      <![CDATA[loop 1000 times\r
+    Alice -> Bob: DNS Attack\r
+end]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Note">
+                    <MenuItem.Tag>
+                      <![CDATA[note left\r
+	a note\r
+	can also be defined\r
+	on several lines\r
+end note]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Partition">
+                    <MenuItem.Tag>
+                      <![CDATA[== Initialisation ==]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Autonumber">
+                    <MenuItem.Tag>
+                      <![CDATA[autonumber 10 "<b>[000]"]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="New page">
+                    <MenuItem.Tag>
+                      <![CDATA[newpage]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Diagram Title">
+                    <MenuItem.Tag>
+                      <![CDATA[title
+ <u>Simple</u> communication example
+ on <i>several</i> lines and using <font color=red>html</font>
+ This is hosted by <img src=sourceforge.jpg>
+end title]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
                 </MenuItem>
+                
                 <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Activity">
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Start">
+                    <MenuItem.Tag>
+                      <![CDATA[
+(*) --> "First Activity"
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="End">
+                    <MenuItem.Tag>
+                      <![CDATA[
+"First Activity" --> (*)
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Next activity">
+                    <MenuItem.Tag>
+                      <![CDATA[
+--> "Second Activity" : You can put also labels
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Side Activity">
+                    <MenuItem.Tag>
+                      <![CDATA[
+"Third Activity" <- "Second Activity"
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Long jump">
+                    <MenuItem.Tag>
+                      <![CDATA[
+"First Activity" ---> Last
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Condition">
+                    <MenuItem.Tag>
+                      <![CDATA[
+--> <> B1\r
+--> [true] "Some Activity"\r
+--> "Another activity"\r
+-> [false] "Something else"\r
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Syncrhonization Bar">
+                    <MenuItem.Tag>
+                      <![CDATA[
+--> ===B1===
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Sync Bar to Activity">
+                    <MenuItem.Tag>
+                      <![CDATA[
+===B1=== --> "Parallel Activity 1"
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Parallel Activities">
+                    <MenuItem.Tag>
+                      <![CDATA[
+(*) --> ===B1===\r
+--> "Parallel Activity 1"\r
+--> ===B2===\r
+\r
+===B1=== --> "Parallel Activity 2"\r
+--> ===B2===\r
+--> (*)
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="HTML Activity">
+                    <MenuItem.Tag>
+                      <![CDATA[
+(*) --> "this <font size=20>activity</font>\r
+is <b>very</b> <font color=red>long</font>\r
+and defined on several lines\r
+that contains many <i>text</i>" as A1\r
+--> "Another activity\n on several lines"\r
+A1 --> "Short activity"
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Note to activity">
+                    <MenuItem.Tag>
+                      <![CDATA[
+(*) --> "Some Activity"\r
+note right: This activity has to be defined\r
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Partition">
+                    <MenuItem.Tag>
+                      <![CDATA[
+partition Conductor
+(*) --> "Climbs on Platform"
+--> === S1 ===
+--> Bows
+end partition
+partition Audience LightSkyBlue
+=== S1 === --> Applauds
+end partition
+partition Conductor
+Bows --> === S2 ===
+--> WavesArmes
+Applauds --> === S2 ===
+end partition
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
                 </MenuItem>
+
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Component">
+                </MenuItem>
+
                 <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Class">
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Generalization">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Human <|-- Student
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Composition">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Class "1" *-- "many" Students : contains
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Aggregation">
+                    <MenuItem.Tag>
+                      <![CDATA[
+School o-- "1...N" Class : aggregates
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Association">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Student "1" -- "1...N" Course : associates
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Class Method">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Course : take()
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Class Property">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Course : Subject[] subjects
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Abstract Class">
+                    <MenuItem.Tag>
+                      <![CDATA[
+abstract Class AbstractClass
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Interface">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Interface SomeInterface
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Enum">
+                    <MenuItem.Tag>
+                      <![CDATA[
+enum TimeUnit\r
+TimeUnit : DAYS\r
+TimeUnit : HOURS\r
+TimeUnit : MINUTES\r
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Package">
+                    <MenuItem.Tag>
+                      <![CDATA[
+package "Classic Collections" #DDDDDD\r
+Object <|-- ArrayList\r
+end package\r
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Package Link">
+                    <MenuItem.Tag>
+                      <![CDATA[
+package foo1.foo2\r
+end package\r
+package foo1.foo2.foo3\r
+class Object\r
+end package\r
+\r
+foo1.foo2 +-- foo1.foo2.foo3\r
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
+                  <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Association Class">
+                    <MenuItem.Tag>
+                      <![CDATA[
+Student "0..*" - "1..*" Course
+(Student, Course) .. Enrollment
+	]]>
+                    </MenuItem.Tag>
+                  </MenuItem>
+
+
                 </MenuItem>                
               </ContextMenu>
             </Button.ContextMenu>
@@ -87,6 +519,14 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
           MaxWidth="30"
           x:Name="RefreshSecondsTextBox">5</TextBox>
           <TextBlock VerticalAlignment="Center" > Seconds</TextBlock>
+          <TextBlock Width="10" ></TextBlock>
+          <Slider x:Name="ZoomSlider"
+          Minimum="0.1"
+          Maximum="2.0"
+          Value="0.8"
+          Width="50"
+          SmallChange="0.1"
+          LargeChange="0.2"></Slider>
         </WrapPanel>
       </Border>
       <Border Grid.Row="2" ScrollViewer.CanContentScroll="True" 
@@ -102,8 +542,21 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
           <Image x:Name="DiagramImage" 
           HorizontalAlignment="Left" 
           VerticalAlignment="Top"
-          Source="{Binding Path=ImageFilePath, Mode=OneWay, Converter={StaticResource uriToImageConverter}}" 
-          Stretch="None" ></Image>
+          Source="{Binding Path=ImageFilePath, Mode=OneWay, Converter={StaticResource uriToImageConverter}}"                  
+          Stretch="None">
+            <Image.ContextMenu>
+              <ContextMenu x:Name="ImageContextMenu" Style="{DynamicResource ContextMenuStyle}">
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Copy to Clipboard" Click="CopyToClipboard_Click"></MenuItem>
+                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Open in explorer" Click="OpenInExplorer_Click"></MenuItem>                
+              </ContextMenu>
+            </Image.ContextMenu>
+            <Image.RenderTransform>
+              <TransformGroup>
+                <ScaleTransform ScaleX="{Binding ElementName=ZoomSlider, Path=Value}" 
+                ScaleY="{Binding ElementName=ZoomSlider, Path=Value}"/>
+              </TransformGroup>
+            </Image.RenderTransform>
+          </Image>
         </ScrollViewer>
       </Border>
     </Grid>

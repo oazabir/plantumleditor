@@ -7,15 +7,15 @@ using System.Threading;
 using System.Windows.Threading;
 using System.Diagnostics;
 
-namespace PlantUmlEditor.Helper
+namespace Utilities
 {
     public static class BackgroundWork
     {
         private static readonly List<Thread> _threadPool = new List<Thread>();
         private static readonly List<DispatcherTimer> _timerPool = new List<DispatcherTimer>();
 
-        private static ManualResetEvent _ThreadEvent = new ManualResetEvent(true);
-        private static ManualResetEvent _TimerEvent = new ManualResetEvent(true);
+        private static ManualResetEvent _AllBackgroundThreadCompletedEvent = new ManualResetEvent(true);
+        private static ManualResetEvent _AllTimerFiredEvent = new ManualResetEvent(true);
 
         public static void DoWork(Action doWork, Action onComplete)
         {
@@ -34,26 +34,32 @@ namespace PlantUmlEditor.Helper
 
         public static void DoWork<T>(Func<T> doWork, Action<T> onComplete, Action<Exception> fail)
         {
-            DoWork<object, T>(new object(), (o, progressCallback) => { return doWork(); },
+            DoWork<object, T>(new object(), 
+                (o, progressCallback) => { return doWork(); },
+                (o, msg, done) => { },
                 (o, result) => onComplete(result),
-                (o, x) => { fail(x); },
-                (o, msg, done) => { });
+                (o, x) => { fail(x); }
+                );
         }
 
         public static void DoWork<T, R>(
             T arg,
             Func<T, Action<T, string, int>, R> doWork,
+            Action<T, string, int> progress,
             Action<T, R> onComplete,
-            Action<T, Exception> fail,
-            Action<T, string, int> progress)
+            Action<T, Exception> fail)
         {
             Dispatcher currentDispatcher = Dispatcher.CurrentDispatcher;
             Thread newThread = new Thread(new ParameterizedThreadStart( (thread)=>
                 {
+                    var currentThread = thread as Thread;
                     try
                     {
+                        Debug.WriteLine(currentThread.ManagedThreadId + " Work execution stated: " + DateTime.Now.ToString());
+
                         R result = doWork(arg,
                             (data, message, percent) => currentDispatcher.BeginInvoke(progress, arg, message, percent));
+
                         if (null == result)
                         {
                             try
@@ -87,10 +93,17 @@ namespace PlantUmlEditor.Helper
                     }
                     finally
                     {
+
+                        Debug.WriteLine(currentThread.ManagedThreadId + " Work execution completed: " + DateTime.Now.ToString());
+
                         lock (_threadPool)
                         {
                             _threadPool.Remove(thread as Thread);
-                            _ThreadEvent.Set();
+                            if (_threadPool.Count == 0)
+                            {
+                                _AllBackgroundThreadCompletedEvent.Set();
+                                Debug.WriteLine("All Work completed: " + DateTime.Now.ToString());
+                            }
                         }
                     }
                 }));
@@ -99,10 +112,11 @@ namespace PlantUmlEditor.Helper
             lock(_threadPool) 
                 _threadPool.Add(newThread);
 
-            newThread.SetApartmentState(ApartmentState.STA);
-            newThread.Start(newThread);
+            _AllBackgroundThreadCompletedEvent.Reset();
+            Debug.WriteLine(newThread.ManagedThreadId + " Work queued at: " + DateTime.Now.ToString());            
 
-            _ThreadEvent.Reset();
+            newThread.SetApartmentState(ApartmentState.STA);
+            newThread.Start(newThread);            
         }
 
         public static DispatcherTimer DoWorkAfter(
@@ -120,6 +134,15 @@ namespace PlantUmlEditor.Helper
             return DoWorkAfter(doWork, (msg, done) => { }, onComplete, (x) => { throw x; }, duration);
         }
 
+        public static DispatcherTimer DoWorkAfter(
+            Action doWork,
+            Action onComplete,
+            Action<Exception> onException,
+            TimeSpan duration)
+        {
+            return DoWorkAfter(doWork, (msg, done) => { }, onComplete, onException, duration);
+        }
+        
         public static DispatcherTimer DoWorkAfter(
             Action doWork, 
             Action<string, int> onProgress,
@@ -152,10 +175,10 @@ namespace PlantUmlEditor.Helper
                 {
                     _timerPool.Remove(currentTimer);
                     if (_timerPool.Count == 0)
-                        _TimerEvent.Set();
+                        _AllTimerFiredEvent.Set();
                 }
 
-                BackgroundWork.DoWork<T, R>(arg, doWork, onComplete, onError, onProgress);
+                BackgroundWork.DoWork<T, R>(arg, doWork, onProgress, onComplete, onError);
             }),
             Dispatcher.CurrentDispatcher);
 
@@ -163,7 +186,7 @@ namespace PlantUmlEditor.Helper
                 _timerPool.Add(timer);
             timer.Start();
 
-            _TimerEvent.Reset();
+            _AllTimerFiredEvent.Reset();
             return timer;
         }
 
@@ -197,9 +220,16 @@ namespace PlantUmlEditor.Helper
             return false;
         }
 
-        public static void WaitForAllWork(TimeSpan timeout)
+        public static bool WaitForAllWork(TimeSpan timeout)
         {
-            _ThreadEvent.WaitOne(Convert.ToInt32(timeout.TotalMilliseconds));
+            lock (_threadPool)
+                if (_threadPool.Count == 0)
+                    return true;
+
+            Debug.WriteLine("Start waiting: " + DateTime.Now.ToString());
+            var result = _AllBackgroundThreadCompletedEvent.WaitOne(timeout);
+            Debug.WriteLine("End waiting: " + DateTime.Now.ToString());
+            return result;
         }
     }
 }

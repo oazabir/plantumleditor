@@ -9,7 +9,7 @@ xmlns:customAnimation="clr-namespace:PlantUmlEditor.CustomAnimation"
 Title="PlantUml Editor" Height="700" Width="740" WindowStartupLocation="CenterScreen"     
 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-Background="{DynamicResource MainBackgroundBrush}" >
+Background="{DynamicResource MainBackgroundBrush}" Loaded="Window_Loaded">
   <Window.Resources>
     <ResourceDictionary>
       <plantuml:DoubleToGridLengthConverter x:Key="doubleToGridLengthConverter" />      
@@ -387,7 +387,7 @@ Background="{DynamicResource MainBackgroundBrush}" >
                   <Border Padding="0,2,0,2" CornerRadius="2" x:Name="DiagramItem" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                     <StackPanel>
                       <WrapPanel HorizontalAlignment="Stretch" Margin="0,0,10,0">
-                        <Image Width="64" Source="{Binding Path=ImageFilePath, Converter={StaticResource uriToImageConverter}}" Margin="3, 5, 10, 0" VerticalAlignment="Top"></Image>
+                        <Image MaxWidth="64" MaxHeight="100"  Source="{Binding Path=ImageFilePath, Converter={StaticResource uriToImageConverter}}" Margin="3, 5, 10, 0" VerticalAlignment="Top"></Image>
                         <StackPanel>
                           <TextBlock Text="{Binding Path=DiagramFileNameOnly}"  />
                           <TextBlock Foreground="White" TextWrapping="WrapWithOverflow" Text="{Binding Path=Preview}" TextTrimming="CharacterEllipsis" MaxHeight="100" ClipToBounds="True" VerticalAlignment="Top" />
@@ -403,7 +403,6 @@ Background="{DynamicResource MainBackgroundBrush}" >
             <StackPanel Grid.Row="2" Height="Auto" HorizontalAlignment="Stretch" Margin="0,0,0,4">
               <Button Height="30" Name="CreateNewDiagram" Template="{DynamicResource GlassButtonTemplate}" Click="CreateNewDiagram_Click">Create New Diagram</Button>
               <Button Template="{DynamicResource GlassButtonTemplate}" x:Name="RefreshDiagramList" Content="Refresh Diagram List" Click="RefreshDiagramList_Click" />
-              <Button Template="{DynamicResource GlassButtonTemplate}" x:Name="RefreshDiagram" Content="Refresh Diagram"/>              
             </StackPanel>
             
           </Grid>

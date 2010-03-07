@@ -12,21 +12,33 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PlantUmlEditor.Model;
-using PlantUmlEditor.Helper;
 using System.Diagnostics;
 using PlantUmlEditor.Properties;
 using System.IO;
+using System.ComponentModel;
+using Utilities;
 
 namespace PlantUmlEditor
 {
     /// <summary>
-    /// Interaction logic for DiagramViewControl.xaml
+    /// Takes a DiagramFile object into DataContext and renders the text editor and 
+    /// shows the generated diagram
     /// </summary>
     public partial class DiagramViewControl : UserControl
     {
+        private WeakReference<MenuItem> _LastMenuItemClicked = default(WeakReference<MenuItem>);
+
         public DiagramViewControl()
         {
             InitializeComponent();
+
+            foreach (MenuItem topLevelMenu in AddContextMenu.Items)
+            {
+                foreach (MenuItem itemMenu in topLevelMenu.Items)
+                {
+                    itemMenu.Click += new RoutedEventHandler(MenuItem_Click);
+                }
+            }
         }
 
         public event Action<DiagramFile> OnBeforeSave;
@@ -48,12 +60,15 @@ namespace PlantUmlEditor
 
         private void RefreshDiagram()
         {
+            if (DesignerProperties.GetIsInDesignMode(this))
+                return;
+
             var diagramFileName = this.CurrentDiagram.DiagramFilePath;
             var content = ContentEditor.Text; //this.CurrentDiagram.Content;
 
             OnBeforeSave(this.CurrentDiagram);
 
-            string plantUmlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plantuml.exe");
+            string plantUmlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Thirdparty\\plantuml.exe");
             if (!File.Exists(plantUmlPath))
             {
                 MessageBox.Show(Window.GetWindow(this), "Cannot find file: " + Environment.NewLine
@@ -86,6 +101,7 @@ namespace PlantUmlEditor
                 () =>
                 {
                     BindingOperations.GetBindingExpression(DiagramImage, Image.SourceProperty).UpdateTarget();
+
                     OnAfterSave(this.CurrentDiagram);
                 },
                 (exception) =>
@@ -114,6 +130,12 @@ namespace PlantUmlEditor
                 var oldDiagram = (e.OldValue as DiagramFile);
                 oldDiagram.Content = ContentEditor.Text;
             }
+
+            if (this._LastMenuItemClicked != default(WeakReference<MenuItem>))
+            {
+                this._LastMenuItemClicked.Dispose();
+                this._LastMenuItemClicked = null;
+            }
         }
 
         private void ContentEditor_TextChanged(object sender, EventArgs e)
@@ -131,18 +153,52 @@ namespace PlantUmlEditor
 
         private void AddStuff_Click(object sender, RoutedEventArgs e)
         {
+            // Trick: Open the context menu automatically whenever user
+            // clicks the "Add" button
             AddContextMenu.IsOpen = true;
+
+            // If user last added a particular diagram items, say Use case
+            // item, then auto open the usecase menu so that user does not
+            // have to click on use case again. Saves time when you are adding
+            // a lot of items for the same diagram
+            if (_LastMenuItemClicked != default(WeakReference<MenuItem>))
+            {
+                MenuItem parentMenu = (_LastMenuItemClicked.Target.Parent as MenuItem);
+                parentMenu.IsSubmenuOpen = true;
+            }
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            this._LastMenuItemClicked = e.Source as MenuItem;
             this.AddCode((e.Source as MenuItem).Tag as string);
         }
 
         private void AddCode(string code)
         {
-            ContentEditor.SelectedText = code + Environment.NewLine;
             ContentEditor.SelectionLength = 0;
+
+            var formattedCode = code.Replace("\\r", Environment.NewLine) 
+                + Environment.NewLine
+                + Environment.NewLine;
+
+            Clipboard.SetText(formattedCode);
+            ContentEditor.Paste();
+
+            this.RefreshDiagram();
         }
+
+        private void CopyToClipboard_Click(object sender, RoutedEventArgs e)
+        {            
+            Clipboard.SetImage(DiagramImage.Source as BitmapSource);
+        }
+
+        private void OpenInExplorer_Click(object sender, RoutedEventArgs e)
+        {
+            Process
+                .Start("explorer.exe","/select," + this.CurrentDiagram.ImageFilePath)
+                .Dispose();
+        }
+
     }
 }

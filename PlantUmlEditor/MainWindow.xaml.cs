@@ -28,12 +28,12 @@ namespace PlantUmlEditor
     using System.Windows.Threading;
     using System.Diagnostics;
     using Microsoft.Win32;
-    using PlantUmlEditor.Helper;    
     using PlantUmlEditor.Model;
     using PlantUmlEditor.CustomAnimation;
+    using Utilities;
 
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// MainWindow that hosts the diagram list box and the editing environment.
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -55,8 +55,7 @@ namespace PlantUmlEditor
             
             // OMAR: Trick #1
             this.DiagramFileListBox.ItemsSource = null;
-            this.DiagramTabs.ItemsSource = null;
-            this.DiagramLocationTextBox.Text = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "\\samples");
+            this.DiagramTabs.ItemsSource = null;            
         }
 
         private void DiagramLocationTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -108,17 +107,21 @@ namespace PlantUmlEditor
                         string content = File.ReadAllText(file);
                         if (content.Length > 0)
                         {
-                            string firstLine = content.Substring(0, content.IndexOf(Environment.NewLine[0]));
+                            string firstLine = content.Substring(0, 
+                                content.IndexOf(Environment.NewLine[0]));
                             if (firstLine.StartsWith("@startuml"))
                             {
-                                string imageFileName = firstLine.Substring(content.IndexOf(' ') + 1).TrimStart('"').TrimEnd('"');
+                                string imageFileName = firstLine.Substring(content.IndexOf(' ') + 1)
+                                    .TrimStart('"').TrimEnd('"');
 
                                 diagrams.Add(new DiagramFile{
                                                       Content = content,
                                                       DiagramFilePath = file,
                                                       ImageFilePath =
-                                                  System.IO.Path.IsPathRooted(imageFileName)
-                                                  ? imageFileName : System.IO.Path.Combine(path, imageFileName)
+                                                  System.IO.Path.IsPathRooted(imageFileName) ? 
+                                                    System.IO.Path.GetFullPath(imageFileName)
+                                                    : System.IO.Path.GetFullPath(
+                                                        System.IO.Path.Combine(path, imageFileName))
                                                   });
                             }
                         }
@@ -135,7 +138,8 @@ namespace PlantUmlEditor
                 },
                 (exception) =>
                 {
-                    MessageBox.Show(this, exception.Message, "Error loading files", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(this, exception.Message, "Error loading files", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                     this.StopProgress(exception.Message);
                 });
         }
@@ -230,7 +234,8 @@ namespace PlantUmlEditor
                 this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, 
                                       () => 
                                       {
-                                          var diagramOnList = this._DiagramFiles.First(d => d.DiagramFilePath == diagramFileName);
+                                          var diagramOnList = this._DiagramFiles.First(
+                                              d => d.DiagramFilePath == diagramFileName);
                                           this.DiagramFileListBox.SelectedItem = diagramOnList;
                                           this.OpenDiagramFile(diagramOnList);
                                       });
@@ -251,6 +256,12 @@ namespace PlantUmlEditor
             var storyboard = ((Storyboard)this.Resources["ExpandTheDiagramListBox"]);
             (storyboard.Children[0] as GridLengthAnimation).To = this.LeftColumnLastWidthBeforeAnimation;
             storyboard.Begin(this, true);
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.DiagramLocationTextBox.Text = System.IO.Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory, "samples\\");
         }
     }
 }

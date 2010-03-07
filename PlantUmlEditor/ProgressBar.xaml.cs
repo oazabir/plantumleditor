@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 namespace PAT
 {
     /// <summary>
-    /// Interaction logic for ProgressBar.xaml
+    /// Some funky progress bar
     /// </summary>
     public partial class ProgressBar : UserControl
     {

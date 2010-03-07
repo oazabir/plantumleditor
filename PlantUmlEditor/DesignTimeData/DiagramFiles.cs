@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using PlantUmlEditor.Model;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace PlantUmlEditor.DesignTimeData
 {
@@ -38,7 +39,7 @@ activate CPE
 deactivate CPE
 @enduml",
                 DiagramFilePath = "test.txt",
-                ImageFilePath = "http://farm1.static.flickr.com/21/24998062_6f4f96ac99.jpg"
+                ImageFilePath = "http://plantuml.sourceforge.net/img/sequence_img009.png"
             });
 
             this.Add(new DiagramFile()
@@ -74,7 +75,7 @@ deactivate SaaS
 
 @enduml",
                 DiagramFilePath = "test2.txt",
-                ImageFilePath = "http://farm4.static.flickr.com/3336/3296789176_90588ac94a.jpg"
+                ImageFilePath = "http://plantuml.sourceforge.net/img/activity_img06.png"
             });
         }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PlantUmlEditor.Helper
+namespace Utilities
 {
     public class OldWindow : System.Windows.Forms.IWin32Window
     {

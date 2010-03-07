@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_440688E2478C6D33322B790144FF63F4"
+        "OwnerKey" = "8:_FC34049DA5A941188640298C743D4171"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_7A651751C8945DE0C254BD2C01E4FA05"
         "OwnerKey" = "8:_FC34049DA5A941188640298C743D4171"
         "MsmSig" = "8:_UNDEFINED"
@@ -29,6 +35,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_FC34049DA5A941188640298C743D4171"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_440688E2478C6D33322B790144FF63F4"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -62,6 +74,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
         "Release"
@@ -116,6 +141,37 @@
         }
         "File"
         {
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_440688E2478C6D33322B790144FF63F4"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_440688E2478C6D33322B790144FF63F4"
+                    {
+                    "Name" = "8:Utilities.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Utilities.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_5046BE3B058A403E8F74757077F62723"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7A651751C8945DE0C254BD2C01E4FA05"
             {
             "AssemblyRegister" = "3:1"
@@ -215,7 +271,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PlantUMLEditor"
         "ProductCode" = "8:{BD279E88-5692-4733-803E-995834A3D697}"
-        "PackageCode" = "8:{24D46F79-558F-4A12-9820-F2A1603B3EA7}"
+        "PackageCode" = "8:{C904E97E-03AE-400A-84D5-F80261F44FE7}"
         "UpgradeCode" = "8:{D68405E2-5C22-46A9-864F-0997F080F99F}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
@@ -773,6 +829,7 @@
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
+                "ExcludeFilter" = "8:EULA.txt"
                 }
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_FC34049DA5A941188640298C743D4171"

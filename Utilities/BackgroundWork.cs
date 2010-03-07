@@ -115,7 +115,7 @@ namespace Utilities
             _AllBackgroundThreadCompletedEvent.Reset();
             Debug.WriteLine(newThread.ManagedThreadId + " Work queued at: " + DateTime.Now.ToString());            
 
-            newThread.SetApartmentState(ApartmentState.STA);
+            //newThread.SetApartmentState(ApartmentState.STA);
             newThread.Start(newThread);            
         }
 

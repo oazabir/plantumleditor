@@ -226,7 +226,9 @@ namespace PlantUmlEditor
             {
                 var diagramFileName = dlg.FileName;
                 File.WriteAllText(diagramFileName, string.Format(
-                    "@startuml \"{0}\"" + Environment.NewLine 
+                    "@startuml \"{0}\"" + Environment.NewLine
+                    + Environment.NewLine
+                    + Environment.NewLine 
                     + "@enduml", 
                     System.IO.Path.GetFileNameWithoutExtension(diagramFileName) + ".png"));
 
@@ -262,6 +264,11 @@ namespace PlantUmlEditor
         {
             this.DiagramLocationTextBox.Text = System.IO.Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory, "samples\\");
+        }
+
+        private void NameHyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            Process.Start((e.OriginalSource as Hyperlink).NavigateUri.ToString());                
         }
     }
 }

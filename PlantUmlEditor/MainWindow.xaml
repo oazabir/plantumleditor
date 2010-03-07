@@ -280,15 +280,33 @@ Background="{DynamicResource MainBackgroundBrush}" Loaded="Window_Loaded">
             <Run FontSize="36" 
             Foreground="#FFFFFFFF" 
             Text="UML"/>
+            <Run Foreground="#55FFFFFF" 
+            FontSize="36" 
+            FontFamily="Segoe" 
+            FontStretch="Condensed" 
+            FontWeight="Thin" 
+            Text="Editor"
+            />            
           </TextBlock>
           <TextBlock Foreground="#55FFFFFF" 
-          FontSize="36" 
+          VerticalAlignment="Center"
+          FontSize="16" 
           FontFamily="Segoe" 
-          VerticalAlignment="Top" 
           FontStretch="Condensed" 
           FontWeight="Thin" 
-          Margin="6,0,0,0" 
-          Width="160"><Run Text="Editor"/></TextBlock>
+          Margin="10"
+          Text="by"></TextBlock>
+          <TextBlock            
+          Background="{x:Null}"
+          Foreground="#55FFFFFF" 
+          VerticalAlignment="Center"
+          FontSize="16" 
+          FontFamily="Segoe" 
+          FontStretch="Condensed" 
+          FontWeight="Thin" >
+            <Hyperlink Foreground="#55FFFFFF" x:Name="NameHyperlink" Click="NameHyperlink_Click" 
+          NavigateUri="http://msmvps.com/blogs/omar">Omar AL Zabir</Hyperlink>
+          </TextBlock>
         </WrapPanel>
       </StackPanel>
       

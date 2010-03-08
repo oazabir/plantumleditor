@@ -523,7 +523,7 @@ Student "0..*" - "1..*" Course
           <Slider x:Name="ZoomSlider"
           Minimum="0.1"
           Maximum="2.0"
-          Value="0.8"
+          Value="0.9"
           Width="50"
           SmallChange="0.1"
           LargeChange="0.2"></Slider>

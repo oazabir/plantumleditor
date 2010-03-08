@@ -55,16 +55,17 @@ namespace PlantUmlEditor
 
         private void SaveDiagram_Click(object sender, RoutedEventArgs e)
         {
-            this.RefreshDiagram();
+            this.SaveAndRefreshDiagram();
         }
 
-        private void RefreshDiagram()
+        private void SaveAndRefreshDiagram()
         {
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
             var diagramFileName = this.CurrentDiagram.DiagramFilePath;
             var content = ContentEditor.Text; //this.CurrentDiagram.Content;
+            this.CurrentDiagram.Content = content;
 
             OnBeforeSave(this.CurrentDiagram);
 
@@ -124,12 +125,7 @@ namespace PlantUmlEditor
             {
                 var newDiagram = (e.NewValue as DiagramFile);
                 ContentEditor.Text = newDiagram.Content;
-            }
-            if (e.OldValue != null)
-            {
-                var oldDiagram = (e.OldValue as DiagramFile);
-                oldDiagram.Content = ContentEditor.Text;
-            }
+            }            
 
             if (this._LastMenuItemClicked != default(WeakReference<MenuItem>))
             {
@@ -144,7 +140,7 @@ namespace PlantUmlEditor
             {
                 if (!BackgroundWork.IsWorkQueued())
                 {
-                    BackgroundWork.DoWorkAfter(RefreshDiagram, 
+                    BackgroundWork.DoWorkAfter(SaveAndRefreshDiagram, 
                                                TimeSpan.FromSeconds(
                                                    int.Parse(RefreshSecondsTextBox.Text)));
                 }
@@ -185,7 +181,7 @@ namespace PlantUmlEditor
             Clipboard.SetText(formattedCode);
             ContentEditor.Paste();
 
-            this.RefreshDiagram();
+            this.SaveAndRefreshDiagram();
         }
 
         private void CopyToClipboard_Click(object sender, RoutedEventArgs e)

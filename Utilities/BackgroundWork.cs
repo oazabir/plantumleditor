@@ -66,6 +66,11 @@ namespace Utilities
                             {
                                 currentDispatcher.BeginInvoke(fail, arg, null);
                             }
+                            catch
+                            {
+                                // Incase the error handler produces exception, we have to gracefully
+                                // handle it since this is a background thread
+                            }
                             finally
                             {
                                 // Nothing to do, error handler is not supposed to produce more error
@@ -115,7 +120,7 @@ namespace Utilities
             _AllBackgroundThreadCompletedEvent.Reset();
             Debug.WriteLine(newThread.ManagedThreadId + " Work queued at: " + DateTime.Now.ToString());            
 
-            //newThread.SetApartmentState(ApartmentState.STA);
+            newThread.SetApartmentState(ApartmentState.STA);
             newThread.Start(newThread);            
         }
 

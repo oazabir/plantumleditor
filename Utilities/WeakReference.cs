@@ -8,7 +8,7 @@ namespace Utilities
     using System;
     using System.Runtime.InteropServices;
 
-    public class WeakReference<T> : IDisposable
+    public class WeakReference<T> : IDisposable        
     {
         private GCHandle handle;
         private bool trackResurrection;

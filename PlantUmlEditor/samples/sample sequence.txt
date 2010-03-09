@@ -4,16 +4,15 @@ participant User
 User -> A: DoWork
 activate A
 
-A -> A: Internal call
-activate A
+	A -> A: Internal call
+	activate A
 
-A -> B: << createRequest >>
-activate B
-
-B --> A: RequestCreated
-deactivate B
-deactivate A
-A -> User: Done
+		A -> B: << createRequest >>
+		activate B
+			B --> A: RequestCreated
+		deactivate B
+	deactivate A
+	A -> User: Done
 deactivate A
 
 @enduml

@@ -64,7 +64,18 @@ namespace PlantUmlEditor
                 return;
 
             var diagramFileName = this.CurrentDiagram.DiagramFilePath;
-            var content = ContentEditor.Text; //this.CurrentDiagram.Content;
+            var pathForContentEditor = ContentEditor.Tag as string;
+
+            if (diagramFileName != pathForContentEditor)
+            {
+                MessageBox.Show(Window.GetWindow(this), 
+                    "Aha! This is one of those weird race condition I am getting into." + Environment.NewLine
+                    + "Close the app and start again", "Weird race condition", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var content = ContentEditor.Text; 
             this.CurrentDiagram.Content = content;
 
             OnBeforeSave(this.CurrentDiagram);
@@ -72,8 +83,9 @@ namespace PlantUmlEditor
             string plantUmlPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Thirdparty\\plantuml.exe");
             if (!File.Exists(plantUmlPath))
             {
-                MessageBox.Show(Window.GetWindow(this), "Cannot find file: " + Environment.NewLine
-                                                        + plantUmlPath, "PlantUml.exe not found", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Window.GetWindow(this), 
+                    "Cannot find file: " + Environment.NewLine
+                    + plantUmlPath, "PlantUml.exe not found", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -120,11 +132,11 @@ namespace PlantUmlEditor
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            // OMAR: Trick #6
             if (e.NewValue != null)
             {
                 var newDiagram = (e.NewValue as DiagramFile);
                 ContentEditor.Text = newDiagram.Content;
+                ContentEditor.Tag = newDiagram.DiagramFilePath;
             }            
 
             if (this._LastMenuItemClicked != default(WeakReference<MenuItem>))

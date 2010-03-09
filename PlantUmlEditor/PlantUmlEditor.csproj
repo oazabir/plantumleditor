@@ -66,10 +66,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Artifacts\Icons.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Controls\ProgressBar.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -131,10 +127,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="Artifacts\.svn\entries" />
-    <None Include="Artifacts\.svn\format" />
-    <None Include="Artifacts\.svn\text-base\Icons.xaml.svn-base" />
-    <None Include="Artifacts\.svn\text-base\Icons.xml.svn-base" />
     <None Include="Controls\.svn\entries" />
     <None Include="Controls\.svn\format" />
     <None Include="Controls\.svn\text-base\ProgressBar.xaml.cs.svn-base" />
@@ -161,7 +153,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Artifacts\Icons.xml" />
     <Resource Include="Skins\Black\bg_green.JPG" />
   </ItemGroup>
   <ItemGroup>
@@ -219,11 +210,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Artifacts\.svn\prop-base\" />
-    <Folder Include="Artifacts\.svn\props\" />
-    <Folder Include="Artifacts\.svn\tmp\prop-base\" />
-    <Folder Include="Artifacts\.svn\tmp\props\" />
-    <Folder Include="Artifacts\.svn\tmp\text-base\" />
     <Folder Include="Controls\.svn\prop-base\" />
     <Folder Include="Controls\.svn\props\" />
     <Folder Include="Controls\.svn\tmp\prop-base\" />

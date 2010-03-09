@@ -31,5 +31,23 @@ namespace PlantUmlEditor.Properties {
                 return ((string)(this["PlantUmlJarPath"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://plantumleditor.googlecode.com/files/PlantUMLSetup.exe")]
+        public string DownloadUrl {
+            get {
+                return ((string)(this["DownloadUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PlantUmlSetup.exe")]
+        public string SetupExeName {
+            get {
+                return ((string)(this["SetupExeName"]));
+            }
+        }
     }
 }

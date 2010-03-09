@@ -31,6 +31,7 @@ namespace PlantUmlEditor
     using PlantUmlEditor.Model;
     using PlantUmlEditor.CustomAnimation;
     using Utilities;
+    using PlantUmlEditor.Properties;
 
     /// <summary>
     /// MainWindow that hosts the diagram list box and the editing environment.
@@ -52,15 +53,12 @@ namespace PlantUmlEditor
         {
             InitializeComponent();            
 
-            
-            // OMAR: Trick #1
             this.DiagramFileListBox.ItemsSource = null;
             this.DiagramTabs.ItemsSource = null;            
         }
 
         private void DiagramLocationTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            // OMAR: Trick #2
             TextBox box = e.Source as TextBox;
             if (box.Text == box.Tag as string)
                 box.Text = string.Empty;
@@ -68,7 +66,6 @@ namespace PlantUmlEditor
 
         private void DiagramLocationTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            // OMAR: Trick #2
             TextBox box = e.Source as TextBox;
             if (box.Text.Length == 0)
                 box.Text = box.Tag as string;
@@ -81,7 +78,7 @@ namespace PlantUmlEditor
                 dlg.ShowNewFolderButton = true;
                 System.Windows.Forms.DialogResult result = 
                 dlg.ShowDialog(
-                    new OldWindow(  // OMAR: Trick #3
+                    new OldWindow( 
                         new WindowInteropHelper(this).Handle));
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
@@ -97,6 +94,7 @@ namespace PlantUmlEditor
             
             this.StartProgress("Loading diagrams...");
 
+            var listbox = new WeakReference<ListBox>(this.DiagramFileListBox);
             BackgroundWork.DoWork<List<DiagramFile>>(
                 () =>
                 {
@@ -132,7 +130,7 @@ namespace PlantUmlEditor
                 (diagrams) =>
                 {                   
                     this._DiagramFiles = new ObservableCollection<DiagramFile>(diagrams);
-                    this.DiagramFileListBox.ItemsSource = this._DiagramFiles;
+                    (listbox.Target as ListBox).ItemsSource = this._DiagramFiles;
                     this.StopProgress("Diagrams loaded.");
                     loaded();
                 },
@@ -233,12 +231,14 @@ namespace PlantUmlEditor
                     System.IO.Path.GetFileNameWithoutExtension(diagramFileName) + ".png"));
 
                 this.DiagramLocationTextBox.Text = System.IO.Path.GetDirectoryName(diagramFileName);
+                WeakReference<ListBox> listbox = this.DiagramFileListBox;
                 this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, 
                                       () => 
                                       {
                                           var diagramOnList = this._DiagramFiles.First(
                                               d => d.DiagramFilePath == diagramFileName);
-                                          this.DiagramFileListBox.SelectedItem = diagramOnList;
+                                          ListBox diagramListBox = listbox;
+                                          diagramListBox.SelectedItem = diagramOnList;
                                           this.OpenDiagramFile(diagramOnList);
                                       });
             }            
@@ -248,13 +248,11 @@ namespace PlantUmlEditor
         {            
             if (this.LeftColumn.ActualWidth > this.LeftColumnLastWidthBeforeAnimation.Value)
                 this.LeftColumnLastWidthBeforeAnimation = new GridLength(this.LeftColumn.ActualWidth);
-            ((Storyboard)this.Resources["CollapseTheDiagramListBox"]).Begin(this, true);            
-            
+            ((Storyboard)this.Resources["CollapseTheDiagramListBox"]).Begin(this, true);                        
         }
 
         private void DiagramView_LostFocus(object sender, RoutedEventArgs e)
         {
-            // OMAR: Trick #4            
             var storyboard = ((Storyboard)this.Resources["ExpandTheDiagramListBox"]);
             (storyboard.Children[0] as GridLengthAnimation).To = this.LeftColumnLastWidthBeforeAnimation;
             storyboard.Begin(this, true);
@@ -262,13 +260,141 @@ namespace PlantUmlEditor
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            if (!CheckGraphViz())
+            {
+                this.Close();
+                return;
+            }
+
             this.DiagramLocationTextBox.Text = System.IO.Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory, "samples\\");
+
+            // After a while check for new version
+            BackgroundWork.DoWorkAfter(CheckForUpdate, TimeSpan.FromMinutes(1));            
+        }
+
+        /// <summary>
+        /// Checks if there's a new version of the app and downloads and installs 
+        /// if user wants to.
+        /// </summary>
+        private void CheckForUpdate()
+        {
+            var me = new WeakReference<Window>(this);
+            
+            // Check if there's a newer version of the app
+            BackgroundWork.DoWork<bool>(() => 
+            {
+                return UpdateChecker.HasUpdate(Settings.Default.DownloadUrl);
+            }, (hasUpdate) =>
+            {
+                if (hasUpdate)
+                {
+                    if (MessageBox.Show(Window.GetWindow(me),
+                        "There's a newer version available. Do you want to download and install?",
+                        "New version available",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information) == MessageBoxResult.Yes)
+                    {
+                        BackgroundWork.DoWork(() => {
+                            var tempPath = System.IO.Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                                Settings.Default.SetupExeName);
+        
+                            UpdateChecker.DownloadLatestUpdate(Settings.Default.DownloadUrl, tempPath);
+                        }, () => { },
+                            (x) =>
+                            {
+                                MessageBox.Show(Window.GetWindow(me),
+                                    "Download failed. When you run next time, it will try downloading again.",
+                                    "Download failed",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+                            });
+                    }
+                }
+            },
+            (x) => { });
+
+            UpdateChecker.DownloadCompleted = new Action<AsyncCompletedEventArgs>((e) =>
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (e.Cancelled || e.Error != default(Exception))
+                    {
+                        MessageBox.Show(Window.GetWindow(me),
+                                    "Download failed. When you run next time, it will try downloading again.",
+                                    "Download failed",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+                    }
+                    else
+                    {
+                        Process.Start(UpdateChecker.DownloadedLocation).Dispose();
+                        this.Close();
+                    }
+                }));
+            });
+
+            UpdateChecker.DownloadProgressChanged = new Action<DownloadProgressChangedEventArgs>((e) =>
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    this.StartProgress("New version downloaded " + e.ProgressPercentage + "%");
+                }));
+            });
+
+            
         }
 
         private void NameHyperlink_Click(object sender, RoutedEventArgs e)
         {
             Process.Start((e.OriginalSource as Hyperlink).NavigateUri.ToString());                
+        }
+
+        private bool CheckGraphViz()
+        {
+            var graphVizPath = Environment.GetEnvironmentVariable("GRAPHVIZ_DOT");
+            if (string.IsNullOrEmpty(graphVizPath))
+            {
+                MessageBox.Show(Window.GetWindow(this),
+                    "You haven't either installed GraphViz or you haven't created " + 
+                    Environment.NewLine + "the environment variable name GRAPHVIZ_DOT that points to the dot.exe" +
+                    Environment.NewLine + "where GraphViz is installed. Please create and re-run.",
+                    "GraphViz Environment variable not found",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                return false;
+            }
+            else
+            {
+                if (!File.Exists(graphVizPath))
+                {
+                    MessageBox.Show(Window.GetWindow(this),
+                        "The path you have set in GRAPHVIZ_DOT is invalid. Please fix.",
+                        "GraphViz path wrong",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    return false;
+                }
+                else
+                {
+                    var filename = System.IO.Path.GetFileName(graphVizPath);
+                    if (filename.ToLower() != "dot.exe")
+                    {
+                        MessageBox.Show(Window.GetWindow(this),
+                            "The path you have set in GRAPHVIZ_DOT is not pointing to dot.exe. It has to be dot.exe's path",
+                            "GraphViz path wrong",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

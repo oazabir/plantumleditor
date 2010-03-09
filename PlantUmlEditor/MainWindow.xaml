@@ -402,13 +402,27 @@ Background="{DynamicResource MainBackgroundBrush}" Loaded="Window_Loaded">
                 <DataTemplate>
                   <DataTemplate.Resources>                                        
                   </DataTemplate.Resources>
-                  <Border Padding="0,2,0,2" CornerRadius="2" x:Name="DiagramItem" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                  <Border Padding="0,2,0,2" 
+                          CornerRadius="2" 
+                          x:Name="DiagramItem" 
+                          HorizontalAlignment="Stretch" 
+                          VerticalAlignment="Top">
                     <StackPanel>
-                      <WrapPanel HorizontalAlignment="Stretch" Margin="0,0,10,0">
-                        <Image MaxWidth="64" MaxHeight="100"  Source="{Binding Path=ImageFilePath, Converter={StaticResource uriToImageConverter}}" Margin="3, 5, 10, 0" VerticalAlignment="Top"></Image>
+                      <WrapPanel HorizontalAlignment="Stretch" 
+                                 Margin="0,0,10,0">
+                        <Image MaxWidth="64" 
+                               MaxHeight="100"  
+                               Source="{Binding Path=ImageFilePath, Converter={StaticResource uriToImageConverter}}" 
+                               Margin="3, 5, 10, 0" VerticalAlignment="Top"></Image>
                         <StackPanel>
                           <TextBlock Text="{Binding Path=DiagramFileNameOnly}"  />
-                          <TextBlock Foreground="White" TextWrapping="WrapWithOverflow" Text="{Binding Path=Preview}" TextTrimming="CharacterEllipsis" MaxHeight="100" ClipToBounds="True" VerticalAlignment="Top" />
+                          <TextBlock Foreground="White" 
+                                     TextWrapping="WrapWithOverflow" 
+                                     Text="{Binding Path=Preview}" 
+                                     TextTrimming="CharacterEllipsis" 
+                                     MaxHeight="100" 
+                                     ClipToBounds="True" 
+                                     VerticalAlignment="Top" />
                         </StackPanel>                      
                       </WrapPanel>
                       <Separator Foreground="Green" Opacity="0.5" />

@@ -8,7 +8,6 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
       <plantuml:UriToCachedImageConverter x:Key="uriToImageConverter" />
       
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Artifacts\Icons.xaml"/>
         <ResourceDictionary Source="Skins\Black\BlackResources.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>  
@@ -34,8 +33,7 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
       Opacity="0.8"
       Text=""
       Padding="10"
-      TextChanged="ContentEditor_TextChanged"       
-      >        
+      TextChanged="ContentEditor_TextChanged">        
       </avalonEdit:TextEditor>
       
       <Border Grid.Row="1" 
@@ -546,8 +544,12 @@ Student "0..*" - "1..*" Course
           Stretch="None">
             <Image.ContextMenu>
               <ContextMenu x:Name="ImageContextMenu" Style="{DynamicResource ContextMenuStyle}">
-                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Copy to Clipboard" Click="CopyToClipboard_Click"></MenuItem>
-                <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Open in explorer" Click="OpenInExplorer_Click"></MenuItem>                
+                <MenuItem Style="{DynamicResource MenuItemStyle}" 
+                          Header="Copy to Clipboard" 
+                          Click="CopyToClipboard_Click"></MenuItem>
+                <MenuItem Style="{DynamicResource MenuItemStyle}" 
+                          Header="Open in explorer" 
+                          Click="OpenInExplorer_Click"></MenuItem>                
               </ContextMenu>
             </Image.ContextMenu>
             <Image.RenderTransform>

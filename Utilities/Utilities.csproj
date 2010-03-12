@@ -49,7 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackgroundWork.cs" />
+    <Compile Include="ParallelWork.cs" />
     <Compile Include="OldWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UpdateChecker.cs" />

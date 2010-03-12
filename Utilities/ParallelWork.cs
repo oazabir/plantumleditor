@@ -9,7 +9,17 @@ using System.Diagnostics;
 
 namespace Utilities
 {
-    public static class BackgroundWork
+    /// <summary>
+    /// ParallelWork allows you to run operations in separate thread yet receive
+    /// success, failure and progress update on the WPF UI thread so that you can
+    /// have a responsive UI and carry out expensive operations in background.
+    /// 
+    /// It's convenient to use than BackgroundWorker component. No need to decare 
+    /// events and preserve stuffs in private variables to access it from different
+    /// event callbacks. You can return data from parallel thread to the success/fail
+    /// callback safely in a strongly typed manner.
+    /// </summary>
+    public static class ParallelWork
     {
         private static readonly List<Thread> _threadPool = new List<Thread>();
         private static readonly List<DispatcherTimer> _timerPool = new List<DispatcherTimer>();
@@ -183,7 +193,7 @@ namespace Utilities
                         _AllTimerFiredEvent.Set();
                 }
 
-                BackgroundWork.DoWork<T, R>(arg, doWork, onProgress, onComplete, onError);
+                ParallelWork.DoWork<T, R>(arg, doWork, onProgress, onComplete, onError);
             }),
             Dispatcher.CurrentDispatcher);
 
@@ -213,11 +223,20 @@ namespace Utilities
             }
         }
 
-        public static bool IsWorkQueued()
+        public static bool IsWorkOrTimerQueued()
         {
             lock (_timerPool)
                 if (_timerPool.Count > 0)
                     return true;
+            lock (_threadPool)
+                if (_threadPool.Count > 0)
+                    return true;
+
+            return false;
+        }
+
+        public static bool IsAnyWorkRunning()
+        {
             lock (_threadPool)
                 if (_threadPool.Count > 0)
                     return true;

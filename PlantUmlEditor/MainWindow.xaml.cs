@@ -95,7 +95,7 @@ namespace PlantUmlEditor
             this.StartProgress("Loading diagrams...");
 
             var listbox = new WeakReference<ListBox>(this.DiagramFileListBox);
-            BackgroundWork.DoWork<List<DiagramFile>>(
+            ParallelWork.DoWork<List<DiagramFile>>(
                 () =>
                 {
                     var diagrams = new List<DiagramFile>();
@@ -192,8 +192,15 @@ namespace PlantUmlEditor
         private void DiagramViewControl_OnClose(DiagramFile diagram)
         {
             this._OpenDiagrams.Remove(diagram);
+
             if (this._OpenDiagrams.Count == 0)
+            {
                 this.WelcomePanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                this.DiagramTabs.SelectedItem = this._OpenDiagrams[0];
+            }
         }
 
         private void StartProgress(string message)
@@ -267,10 +274,10 @@ namespace PlantUmlEditor
             }
 
             this.DiagramLocationTextBox.Text = System.IO.Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory, "samples\\");
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PlantUmlEditor\\samples\\");
 
             // After a while check for new version
-            BackgroundWork.DoWorkAfter(CheckForUpdate, TimeSpan.FromMinutes(1));            
+            ParallelWork.DoWorkAfter(CheckForUpdate, TimeSpan.FromMinutes(1));            
         }
 
         /// <summary>
@@ -282,7 +289,7 @@ namespace PlantUmlEditor
             var me = new WeakReference<Window>(this);
             
             // Check if there's a newer version of the app
-            BackgroundWork.DoWork<bool>(() => 
+            ParallelWork.DoWork<bool>(() => 
             {
                 return UpdateChecker.HasUpdate(Settings.Default.DownloadUrl);
             }, (hasUpdate) =>
@@ -295,7 +302,7 @@ namespace PlantUmlEditor
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information) == MessageBoxResult.Yes)
                     {
-                        BackgroundWork.DoWork(() => {
+                        ParallelWork.DoWork(() => {
                             var tempPath = System.IO.Path.Combine(
                                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                 Settings.Default.SetupExeName);

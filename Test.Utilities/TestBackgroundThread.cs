@@ -19,14 +19,14 @@ namespace Test.Utilities
             var stopWatch = new Stopwatch();
             "Given no work going on".Context(() =>
             {
-                Assert.False(BackgroundWork.IsWorkQueued());
+                Assert.False(ParallelWork.IsWorkOrTimerQueued());
             });
 
             var result = default(bool);
             "When WaitForAllWork is called".Do(() =>
             {
                 stopWatch.Start();
-                result = BackgroundWork.WaitForAllWork(TimeSpan.FromSeconds(1));
+                result = ParallelWork.WaitForAllWork(TimeSpan.FromSeconds(1));
             });
 
             "It should return immediately without going into any wait period".Assert(() =>
@@ -59,7 +59,7 @@ namespace Test.Utilities
                     
             Func<bool> waitForWorkDone = () => {
                 TimeSpan timeout = howLongWorkTakes.Add(TimeSpan.FromSeconds(5));
-                if (BackgroundWork.WaitForAllWork(timeout))
+                if (ParallelWork.WaitForAllWork(timeout))
                 {
                     // Let the Disptacher.BeginInvoke calls proceed
                     Dispatcher.PushFrame(frame);
@@ -78,7 +78,7 @@ namespace Test.Utilities
 
             "Given no background work running".Context(() =>
             {
-                Assert.False(BackgroundWork.IsWorkQueued());                
+                Assert.False(ParallelWork.IsWorkOrTimerQueued());                
                 frame = new DispatcherFrame();
 
                 doWorkCalled = false;
@@ -96,7 +96,7 @@ namespace Test.Utilities
             "When a new work is queued".Do(() =>
             {
                 var shouldThrowException = letsThrowException;
-                BackgroundWork.DoWork(() => // doWork
+                ParallelWork.DoWork(() => // doWork
                 {
                     doWorkThreadId = Thread.CurrentThread.ManagedThreadId;
                     doWorkCalled = true;
@@ -131,7 +131,7 @@ namespace Test.Utilities
 
             "It should return true if IsWorkQueued is called".Assert(() =>
             {
-                Assert.True(BackgroundWork.IsWorkQueued());
+                Assert.True(ParallelWork.IsWorkOrTimerQueued());
                 Assert.True(waitForWorkDone());
             });
 

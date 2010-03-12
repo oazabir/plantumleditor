@@ -63,6 +63,9 @@ namespace PlantUmlEditor
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
+            if (this.CurrentDiagram == default(DiagramFile))
+                return;
+
             var diagramFileName = this.CurrentDiagram.DiagramFilePath;
             var pathForContentEditor = ContentEditor.Tag as string;
 
@@ -89,8 +92,10 @@ namespace PlantUmlEditor
                 return;
             }
 
-            BackgroundWork.WaitForAllWork(TimeSpan.FromSeconds(20));
-            BackgroundWork.DoWork(
+            if (ParallelWork.IsAnyWorkRunning())
+                return;
+
+            ParallelWork.DoWork(
                 () =>
                 {
                     // Save the diagram content
@@ -150,9 +155,9 @@ namespace PlantUmlEditor
         {
             if (AutoRefreshCheckbox.IsChecked.Value)
             {
-                if (!BackgroundWork.IsWorkQueued())
+                if (!ParallelWork.IsAnyWorkRunning())
                 {
-                    BackgroundWork.DoWorkAfter(SaveAndRefreshDiagram, 
+                    ParallelWork.DoWorkAfter(SaveAndRefreshDiagram, 
                                                TimeSpan.FromSeconds(
                                                    int.Parse(RefreshSecondsTextBox.Text)));
                 }
@@ -206,6 +211,13 @@ namespace PlantUmlEditor
             Process
                 .Start("explorer.exe","/select," + this.CurrentDiagram.ImageFilePath)
                 .Dispose();
+        }
+
+        private void ContentEditor_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.S)
+                if (Keyboard.Modifiers == ModifierKeys.Control)
+                    this.SaveAndRefreshDiagram();
         }
 
     }

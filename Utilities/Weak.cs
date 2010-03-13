@@ -8,23 +8,23 @@ namespace Utilities
     using System;
     using System.Runtime.InteropServices;
 
-    public class WeakReference<T> : IDisposable        
+    public class Weak<T> : IDisposable        
     {
         private GCHandle handle;
         private bool trackResurrection;
 
-        public WeakReference(T target)
+        public Weak(T target)
             : this(target, false)
         {
         }
 
-        public WeakReference(T target, bool trackResurrection)
+        public Weak(T target, bool trackResurrection)
         {
             this.trackResurrection = trackResurrection;
             this.Target = target;
         }
 
-        ~WeakReference()
+        ~Weak()
         {
             Dispose();
         }
@@ -57,17 +57,21 @@ namespace Utilities
             }
             set
             {
+                if (handle != null)
+                    if (handle.IsAllocated)
+                        handle.Free();
+
                 handle = GCHandle.Alloc(value,
                   this.trackResurrection ? GCHandleType.WeakTrackResurrection : GCHandleType.Weak);
             }
         }
 
-        public static implicit operator WeakReference<T>(T obj)  
+        public static implicit operator Weak<T>(T obj)  
         {
-            return new WeakReference<T>(obj);
+            return new Weak<T>(obj);
         }
 
-        public static implicit operator T(WeakReference<T> weakRef)  
+        public static implicit operator T(Weak<T> weakRef)  
         {
             return weakRef.Target;
         }

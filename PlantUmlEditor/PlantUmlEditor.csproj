@@ -156,6 +156,7 @@
     <Resource Include="Skins\Black\bg_green.JPG" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="ChangeLog.txt" />
     <Content Include="EULA.txt" />
     <Content Include="samples\img\activity_img20.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

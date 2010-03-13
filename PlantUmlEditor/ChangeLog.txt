@@ -1,0 +1,6 @@
+﻿Version 1.1.1
+=============
+
+FIX: File is saved using UTF-8 format to preserve non-English characters.
+CHANGE: WeakReference<T> changed to Weak<T>
+CHANGE: ParallelWork made more robust

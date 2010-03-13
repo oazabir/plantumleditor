@@ -59,22 +59,27 @@ namespace Utilities
             Action<T, R> onComplete,
             Action<T, Exception> fail)
         {
-            Dispatcher currentDispatcher = Dispatcher.CurrentDispatcher;
+            Weak<Dispatcher> currentDispatcher = Dispatcher.CurrentDispatcher;
             Thread newThread = new Thread(new ParameterizedThreadStart( (thread)=>
                 {
                     var currentThread = thread as Thread;
+
+                    Dispatcher dispatcher = currentDispatcher;
+                    if (null == dispatcher)
+                        fail(arg, new ApplicationException("Dispatcher is unavailable"));
+                        
                     try
                     {
                         Debug.WriteLine(currentThread.ManagedThreadId + " Work execution stated: " + DateTime.Now.ToString());
-
+                        
                         R result = doWork(arg,
-                            (data, message, percent) => currentDispatcher.BeginInvoke(progress, arg, message, percent));
+                            (data, message, percent) => dispatcher.BeginInvoke(progress, arg, message, percent));
 
                         if (null == result)
                         {
                             try
                             {
-                                currentDispatcher.BeginInvoke(fail, arg, null);
+                                dispatcher.BeginInvoke(fail, arg, null);
                             }
                             catch
                             {
@@ -90,11 +95,11 @@ namespace Utilities
                         {
                             try
                             {
-                                currentDispatcher.BeginInvoke(onComplete, arg, result);
+                                dispatcher.BeginInvoke(onComplete, arg, result);
                             }
                             catch (Exception x)
                             {
-                                currentDispatcher.BeginInvoke(fail, arg, x);
+                                dispatcher.BeginInvoke(fail, arg, x);
                             }
                         }
                     }
@@ -104,11 +109,11 @@ namespace Utilities
                     }
                     catch (Exception x)
                     {
-                        currentDispatcher.BeginInvoke(fail, arg, x);
+                        dispatcher.BeginInvoke(fail, arg, x);
                     }
                     finally
                     {
-
+                        currentDispatcher.Dispose();
                         Debug.WriteLine(currentThread.ManagedThreadId + " Work execution completed: " + DateTime.Now.ToString());
 
                         lock (_threadPool)
@@ -197,16 +202,32 @@ namespace Utilities
             }),
             Dispatcher.CurrentDispatcher);
 
+            _AllTimerFiredEvent.Reset();
+            
             lock(_timerPool)
                 _timerPool.Add(timer);
             timer.Start();
 
-            _AllTimerFiredEvent.Reset();
             return timer;
         }
 
         public static void StopAll()
         {
+            while (_timerPool.Count > 0)
+            {
+                DispatcherTimer timer = _timerPool[0];
+                try
+                {
+                    timer.Stop();
+                }
+                finally
+                {
+                    lock (_timerPool)
+                        if (_timerPool.Contains(timer))
+                            _timerPool.Remove(timer);
+                }
+            }
+
             while (_threadPool.Count > 0)
             {
                 Thread t = _threadPool[0];
@@ -220,7 +241,7 @@ namespace Utilities
                         if (_threadPool.Contains(t))
                             _threadPool.Remove(t);
                 }
-            }
+            }            
         }
 
         public static bool IsWorkOrTimerQueued()
@@ -240,7 +261,6 @@ namespace Utilities
             lock (_threadPool)
                 if (_threadPool.Count > 0)
                     return true;
-
             return false;
         }
 
@@ -254,6 +274,46 @@ namespace Utilities
             var result = _AllBackgroundThreadCompletedEvent.WaitOne(timeout);
             Debug.WriteLine("End waiting: " + DateTime.Now.ToString());
             return result;
+        }
+    }
+
+    public class Start
+    {
+        private Action OnWork = () => { };
+        private Action OnSuccess = () => { };
+        private Action<Exception> OnException = (x) => { };
+        private Action<string, int> OnProgress = (msg, progress) => { } ;
+
+        public static Start Work(Action callback)
+        {
+            return new Start { OnWork = callback };
+        }
+
+        public Start OnComplete(Action callback)
+        {
+            this.OnSuccess = callback;
+            return this;
+        }
+
+        public Start OnException(Action<Exception> callback)
+        {
+            this.OnException = callback;
+            return this;
+        }
+
+        public Start OnProgress(Action<string, int> callback)
+        {
+            this.OnProgress = callback;
+            return this;
+        }
+
+        public void Now()
+        {
+            
+        }
+
+        public void After(TimeSpan duration)
+        {
         }
     }
 }

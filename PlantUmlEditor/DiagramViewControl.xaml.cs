@@ -26,7 +26,7 @@ namespace PlantUmlEditor
     /// </summary>
     public partial class DiagramViewControl : UserControl
     {
-        private WeakReference<MenuItem> _LastMenuItemClicked = default(WeakReference<MenuItem>);
+        private Weak<MenuItem> _LastMenuItemClicked = default(Weak<MenuItem>);
 
         public DiagramViewControl()
         {
@@ -99,7 +99,7 @@ namespace PlantUmlEditor
                 () =>
                 {
                     // Save the diagram content
-                    File.WriteAllText(diagramFileName, content);
+                    File.WriteAllText(diagramFileName, content, Encoding.UTF8);
 
                     // Use plantuml to generate the graph again                    
                     using (var process = new Process())
@@ -144,7 +144,7 @@ namespace PlantUmlEditor
                 ContentEditor.Tag = newDiagram.DiagramFilePath;
             }            
 
-            if (this._LastMenuItemClicked != default(WeakReference<MenuItem>))
+            if (this._LastMenuItemClicked != default(Weak<MenuItem>))
             {
                 this._LastMenuItemClicked.Dispose();
                 this._LastMenuItemClicked = null;
@@ -174,7 +174,7 @@ namespace PlantUmlEditor
             // item, then auto open the usecase menu so that user does not
             // have to click on use case again. Saves time when you are adding
             // a lot of items for the same diagram
-            if (_LastMenuItemClicked != default(WeakReference<MenuItem>))
+            if (_LastMenuItemClicked != default(Weak<MenuItem>))
             {
                 MenuItem parentMenu = (_LastMenuItemClicked.Target.Parent as MenuItem);
                 parentMenu.IsSubmenuOpen = true;

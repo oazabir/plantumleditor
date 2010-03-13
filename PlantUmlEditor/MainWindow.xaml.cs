@@ -94,7 +94,7 @@ namespace PlantUmlEditor
             
             this.StartProgress("Loading diagrams...");
 
-            var listbox = new WeakReference<ListBox>(this.DiagramFileListBox);
+            var listbox = new Weak<ListBox>(this.DiagramFileListBox);
             ParallelWork.DoWork<List<DiagramFile>>(
                 () =>
                 {
@@ -238,7 +238,7 @@ namespace PlantUmlEditor
                     System.IO.Path.GetFileNameWithoutExtension(diagramFileName) + ".png"));
 
                 this.DiagramLocationTextBox.Text = System.IO.Path.GetDirectoryName(diagramFileName);
-                WeakReference<ListBox> listbox = this.DiagramFileListBox;
+                Weak<ListBox> listbox = this.DiagramFileListBox;
                 this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, 
                                       () => 
                                       {
@@ -286,7 +286,7 @@ namespace PlantUmlEditor
         /// </summary>
         private void CheckForUpdate()
         {
-            var me = new WeakReference<Window>(this);
+            var me = new Weak<Window>(this);
             
             // Check if there's a newer version of the app
             ParallelWork.DoWork<bool>(() => 
@@ -320,7 +320,14 @@ namespace PlantUmlEditor
                     }
                 }
             },
-            (x) => { });
+            (x) => 
+            {
+                MessageBox.Show(Window.GetWindow(me),
+                    x.Message,
+                    "Download failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation);
+            });
 
             UpdateChecker.DownloadCompleted = new Action<AsyncCompletedEventArgs>((e) =>
             {

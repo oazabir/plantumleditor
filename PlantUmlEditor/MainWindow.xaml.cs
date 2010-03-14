@@ -95,8 +95,7 @@ namespace PlantUmlEditor
             this.StartProgress("Loading diagrams...");
 
             var listbox = new Weak<ListBox>(this.DiagramFileListBox);
-            ParallelWork.DoWork<List<DiagramFile>>(
-                () =>
+            Start<List<DiagramFile>>.Work(() =>
                 {
                     var diagrams = new List<DiagramFile>();
             
@@ -126,15 +125,15 @@ namespace PlantUmlEditor
                     }
 
                     return diagrams;
-                },
-                (diagrams) =>
+                })
+                .OnComplete((diagrams) =>
                 {                   
                     this._DiagramFiles = new ObservableCollection<DiagramFile>(diagrams);
                     (listbox.Target as ListBox).ItemsSource = this._DiagramFiles;
                     this.StopProgress("Diagrams loaded.");
                     loaded();
-                },
-                (exception) =>
+                })
+                .OnException((exception) =>
                 {
                     MessageBox.Show(this, exception.Message, "Error loading files", 
                         MessageBoxButton.OK, MessageBoxImage.Error);
@@ -277,7 +276,7 @@ namespace PlantUmlEditor
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PlantUmlEditor\\samples\\");
 
             // After a while check for new version
-            ParallelWork.DoWorkAfter(CheckForUpdate, TimeSpan.FromMinutes(1));            
+            ParallelWork.StartAfter(CheckForUpdate, TimeSpan.FromMinutes(1));            
         }
 
         /// <summary>
@@ -289,10 +288,11 @@ namespace PlantUmlEditor
             var me = new Weak<Window>(this);
             
             // Check if there's a newer version of the app
-            ParallelWork.DoWork<bool>(() => 
+            Start<bool>.Work(() => 
             {
                 return UpdateChecker.HasUpdate(Settings.Default.DownloadUrl);
-            }, (hasUpdate) =>
+            })
+            .OnComplete((hasUpdate) =>
             {
                 if (hasUpdate)
                 {
@@ -302,7 +302,7 @@ namespace PlantUmlEditor
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information) == MessageBoxResult.Yes)
                     {
-                        ParallelWork.DoWork(() => {
+                        ParallelWork.StartNow(() => {
                             var tempPath = System.IO.Path.Combine(
                                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                 Settings.Default.SetupExeName);
@@ -319,8 +319,8 @@ namespace PlantUmlEditor
                             });
                     }
                 }
-            },
-            (x) => 
+            })
+            .OnException((x) => 
             {
                 MessageBox.Show(Window.GetWindow(me),
                     x.Message,

@@ -95,8 +95,7 @@ namespace PlantUmlEditor
             if (ParallelWork.IsAnyWorkRunning())
                 return;
 
-            ParallelWork.DoWork(
-                () =>
+            Start.Work(() =>
                 {
                     // Save the diagram content
                     File.WriteAllText(diagramFileName, content, Encoding.UTF8);
@@ -115,14 +114,14 @@ namespace PlantUmlEditor
                             process.WaitForExit(10000);
                         }
                     }
-                },
-                () =>
+                })
+                .OnComplete(() =>
                 {
                     BindingOperations.GetBindingExpression(DiagramImage, Image.SourceProperty).UpdateTarget();
 
                     OnAfterSave(this.CurrentDiagram);
-                },
-                (exception) =>
+                })
+                .OnException((exception) =>
                 {
                     OnAfterSave(this.CurrentDiagram);
                     MessageBox.Show(Window.GetWindow(this), exception.Message, "Error running PlantUml",
@@ -157,7 +156,7 @@ namespace PlantUmlEditor
             {
                 if (!ParallelWork.IsAnyWorkRunning())
                 {
-                    ParallelWork.DoWorkAfter(SaveAndRefreshDiagram, 
+                    ParallelWork.StartAfter(SaveAndRefreshDiagram, 
                                                TimeSpan.FromSeconds(
                                                    int.Parse(RefreshSecondsTextBox.Text)));
                 }

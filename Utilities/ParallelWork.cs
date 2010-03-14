@@ -27,24 +27,24 @@ namespace Utilities
         private static ManualResetEvent _AllBackgroundThreadCompletedEvent = new ManualResetEvent(true);
         private static ManualResetEvent _AllTimerFiredEvent = new ManualResetEvent(true);
 
-        public static void DoWork(Action doWork, Action onComplete)
+        public static void StartNow(Action doWork, Action onComplete)
         {
-            DoWork(doWork, onComplete, (x) => { throw x; });
+            StartNow(doWork, onComplete, (x) => { throw x; });
         }
 
-        public static void DoWork(Action doWork, Action onComplete, Action<Exception> failed)
+        public static void StartNow(Action doWork, Action onComplete, Action<Exception> failed)
         {
-            DoWork<object>(() => { doWork(); return true; }, (o) => onComplete(), failed);
+            StartNow<object>(() => { doWork(); return true; }, (o) => onComplete(), failed);
         }
 
-        public static void DoWork<T>(Func<T> doWork, Action<T> onComplete)
+        public static void StartNow<T>(Func<T> doWork, Action<T> onComplete)
         {
-            DoWork<T>(doWork, onComplete, (x) => { throw x; });
+            StartNow<T>(doWork, onComplete, (x) => { throw x; });
         }
 
-        public static void DoWork<T>(Func<T> doWork, Action<T> onComplete, Action<Exception> fail)
+        public static void StartNow<T>(Func<T> doWork, Action<T> onComplete, Action<Exception> fail)
         {
-            DoWork<object, T>(new object(), 
+            StartNow<object, T>(new object(), 
                 (o, progressCallback) => { return doWork(); },
                 (o, msg, done) => { },
                 (o, result) => onComplete(result),
@@ -52,7 +52,7 @@ namespace Utilities
                 );
         }
 
-        public static void DoWork<T, R>(
+        public static void StartNow<T, R>(
             T arg,
             Func<T, Action<T, string, int>, R> doWork,
             Action<T, string, int> progress,
@@ -139,31 +139,31 @@ namespace Utilities
             newThread.Start(newThread);            
         }
 
-        public static DispatcherTimer DoWorkAfter(
+        public static DispatcherTimer StartAfter(
             Action onComplete,
             TimeSpan duration)
         {
-            return DoWorkAfter(() => { }, (msg, done) => { }, onComplete, (x) => { throw x; }, duration);
+            return StartAfter(() => { }, (msg, done) => { }, onComplete, (x) => { throw x; }, duration);
         }
 
-        public static DispatcherTimer DoWorkAfter(
+        public static DispatcherTimer StartAfter(
             Action doWork,
             Action onComplete,
             TimeSpan duration)            
         {
-            return DoWorkAfter(doWork, (msg, done) => { }, onComplete, (x) => { throw x; }, duration);
+            return StartAfter(doWork, (msg, done) => { }, onComplete, (x) => { throw x; }, duration);
         }
 
-        public static DispatcherTimer DoWorkAfter(
+        public static DispatcherTimer StartAfter(
             Action doWork,
             Action onComplete,
             Action<Exception> onException,
             TimeSpan duration)
         {
-            return DoWorkAfter(doWork, (msg, done) => { }, onComplete, onException, duration);
+            return StartAfter(doWork, (msg, done) => { }, onComplete, onException, duration);
         }
         
-        public static DispatcherTimer DoWorkAfter(
+        public static DispatcherTimer StartAfter(
             Action doWork, 
             Action<string, int> onProgress,
             Action onComplete, 
@@ -171,7 +171,7 @@ namespace Utilities
             TimeSpan duration)
         {
             var currentDispatcher = Dispatcher.CurrentDispatcher;
-            return DoWorkAfter<Dispatcher, bool>(currentDispatcher,
+            return StartAfter<Dispatcher, bool>(currentDispatcher,
                 (dispatcher, progress) => { doWork(); return true; }, 
                 (dispatcher, msg, done) => onProgress(msg, done), 
                 (dispatcher, result) => onComplete(),
@@ -179,7 +179,7 @@ namespace Utilities
                 duration);
         }
 
-        public static DispatcherTimer DoWorkAfter<T, R>(
+        public static DispatcherTimer StartAfter<T, R>(
             T arg,
             Func<T, Action<T, string, int>, R> doWork, 
             Action<T, string, int> onProgress,
@@ -198,7 +198,7 @@ namespace Utilities
                         _AllTimerFiredEvent.Set();
                 }
 
-                ParallelWork.DoWork<T, R>(arg, doWork, onProgress, onComplete, onError);
+                ParallelWork.StartNow<T, R>(arg, doWork, onProgress, onComplete, onError);
             }),
             Dispatcher.CurrentDispatcher);
 
@@ -279,41 +279,168 @@ namespace Utilities
 
     public class Start
     {
-        private Action OnWork = () => { };
-        private Action OnSuccess = () => { };
-        private Action<Exception> OnException = (x) => { };
-        private Action<string, int> OnProgress = (msg, progress) => { } ;
+        private Action workHandler;
+        private Action successHandler = () => { };
+        private Action<Exception> exceptionHandler = (x) => { };
+        private Action<string, int> progressHandler = (msg, progress) => { } ;
 
         public static Start Work(Action callback)
         {
-            return new Start { OnWork = callback };
+            return new Start { workHandler = callback };
         }
 
         public Start OnComplete(Action callback)
         {
-            this.OnSuccess = callback;
+            this.successHandler = callback;
             return this;
         }
 
         public Start OnException(Action<Exception> callback)
         {
-            this.OnException = callback;
+            this.exceptionHandler = callback;
             return this;
         }
 
         public Start OnProgress(Action<string, int> callback)
         {
-            this.OnProgress = callback;
+            this.progressHandler = callback;
             return this;
         }
 
-        public void Now()
+        public void Run()
         {
-            
+            ParallelWork.StartNow<object, object>(new object(),
+                (o, progressCallback) => { this.workHandler(); return new object(); },
+                (o, msg, done) => { this.progressHandler(msg, done); },
+                (o, result) => { this.successHandler(); },
+                (o, x) => { this.exceptionHandler(x); });
         }
 
-        public void After(TimeSpan duration)
+        public void RunAfter(TimeSpan duration)
         {
+            ParallelWork.StartAfter<object, object>(new object(),
+                (o, progressCallback) => { this.workHandler(); return new object(); },
+                (o, msg, done) => { this.progressHandler(msg, done); },
+                (o, result) => { this.successHandler(); },
+                (o, x) => { this.exceptionHandler(x); },
+                duration);
+        }
+    }
+
+    public class Start<T, R>
+    {
+        private Func<T, Action<T, string, int>, R> workHandler;
+        private Action<T,R> successHandler = (arg, result) => { };
+        private Action<T, Exception> exceptionHandler = (arg, x) => { };
+        private Action<T, string, int> progressHandler = (arg, msg, progress) => { };
+
+        public static Start<T,R> Work(Func<T, Action<T, string, int>, R> callback)
+        {
+            return new Start<T,R> { workHandler = callback };
+        }
+
+        public Start<T,R> OnComplete(Action<T,R> callback)
+        {
+            this.successHandler = callback;
+            return this;
+        }
+
+        public Start<T,R> OnException(Action<T, Exception> callback)
+        {
+            this.exceptionHandler = callback;
+            return this;
+        }
+
+        public Start<T,R> OnProgress(Action<T, string, int> callback)
+        {
+            this.progressHandler = callback;
+            return this;
+        }
+
+        public void RunNow(T arg)
+        {
+            ParallelWork.StartNow<T, R>(arg,
+                this.workHandler,
+                this.progressHandler,
+                this.successHandler,
+                this.exceptionHandler);
+        }
+
+        public void RunAfter(T arg, TimeSpan duration)
+        {
+            ParallelWork.StartAfter<T, R>(arg,
+                this.workHandler,
+                this.progressHandler,
+                this.successHandler,
+                this.exceptionHandler,
+                duration);
+        }
+    }
+
+    public class Start<R>
+    {
+        private Func<Action<string, int>, R> workHandlerWithProgress;
+        private Action<R> successHandler = (result) => { };
+        private Action<Exception> exceptionHandler = (x) => { };
+        private Action<string, int> progressHandler = (msg, progress) => { };
+
+        public static Start<R> Work(Func<R> callback)
+        {
+            return new Start<R> { workHandlerWithProgress = (onprogress) => { return callback(); } };
+        }
+
+        public static Start<R> Work(Func<Action<string,int>, R> callback)
+        {
+            return new Start<R> { workHandlerWithProgress = callback };
+        }
+
+        public Start<R> OnComplete(Action<R> callback)
+        {
+            this.successHandler = callback;
+            return this;
+        }
+
+        public Start<R> OnException(Action<Exception> callback)
+        {
+            this.exceptionHandler = callback;
+            return this;
+        }
+
+        public Start<R> OnProgress(Action<string, int> callback)
+        {
+            this.progressHandler = callback;
+            return this;
+        }
+
+        public void Run()
+        {
+            ParallelWork.StartNow<object, R>(default(object),
+                (arg, onprogress) => 
+                {
+                    return this.workHandlerWithProgress((msg, done) =>
+                        {
+                            onprogress(default(object), msg, done);
+                        });
+                },
+                (arg, msg, done) => { this.progressHandler(msg, done); },
+                (arg, result) => { this.successHandler(result); },
+                (arg, x) => { this.exceptionHandler(x); });
+        }
+
+        public void RunAfter(TimeSpan duration)
+        {
+            ParallelWork.StartAfter<object, R>(default(object),
+                (arg, onprogress) =>
+                {
+                    return this.workHandlerWithProgress((msg, done) =>
+                    {
+                        onprogress(default(object), msg, done);
+                    });
+                },
+                (arg, msg, done) => { this.progressHandler(msg, done); },
+                (arg, result) => { this.successHandler(result); },
+                (arg, x) => { this.exceptionHandler(x); },
+                duration);
         }
     }
 }

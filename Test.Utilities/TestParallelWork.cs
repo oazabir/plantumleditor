@@ -41,7 +41,7 @@ namespace Test.Utilities
         }
 
         [Specification][STAThread]
-        public void DoWork_should_queue_a_new_thread_to_do_the_work()
+        public void StartNow_should_queue_a_new_thread_to_do_the_work()
         {
             TimeSpan howLongWorkTakes = TimeSpan.FromSeconds(2);
             TimeSpan timeout = howLongWorkTakes.Add(TimeSpan.FromMilliseconds(500));
@@ -62,7 +62,7 @@ namespace Test.Utilities
                 frame.Continue = false; // Dispatcher should stop now
             };
 
-            "Given no background work running".Context(() =>
+            "Given no parallel work running".Context(() =>
             {
                 Assert.False(ParallelWork.IsWorkOrTimerQueued());                
                 frame = new DispatcherFrame();
@@ -78,34 +78,38 @@ namespace Test.Utilities
                 stopWatch.Reset();                
             });
 
-            "When a new work is queued".Do(() =>
+            "When a new work is started by Start.Work().Run()".Do(() =>
             {
                 var shouldThrowException = letsThrowException;
-                ParallelWork.DoWork(() => // doWork
-                {
-                    doWorkThreadId = Thread.CurrentThread.ManagedThreadId;
-                    doWorkCalled = true;
 
-                    // Simulate some delay in background work
-                    Thread.Sleep(howLongWorkTakes); 
-
-                    if (shouldThrowException)
+                Start.Work(() =>
                     {
-                        throw new ApplicationException("Exception");
-                    }                                
-                }, () => // onComplete
-                {
-                    onCompleteThreadId = Thread.CurrentThread.ManagedThreadId;
-                    successCallbackFired = true;
+                        doWorkThreadId = Thread.CurrentThread.ManagedThreadId;
+                        doWorkCalled = true;
 
-                    callbackFiredOnDispatcher();
-                }, (x) => // onException
-                {
-                    onExceptionThreadId = Thread.CurrentThread.ManagedThreadId;
-                    onExceptionFired = true;
+                        // Simulate some delay in background work
+                        Thread.Sleep(howLongWorkTakes);
 
-                    callbackFiredOnDispatcher();
-                });
+                        if (shouldThrowException)
+                        {
+                            throw new ApplicationException("Exception");
+                        }
+                    })
+                    .OnComplete(() =>
+                    {
+                        onCompleteThreadId = Thread.CurrentThread.ManagedThreadId;
+                        successCallbackFired = true;
+
+                        callbackFiredOnDispatcher();
+                    })
+                    .OnException((x) =>
+                    {
+                        onExceptionThreadId = Thread.CurrentThread.ManagedThreadId;
+                        onExceptionFired = true;
+
+                        callbackFiredOnDispatcher();
+                    })
+                    .Run();
 
                 stopWatch.Start();
             });
@@ -175,7 +179,7 @@ namespace Test.Utilities
 
             DispatcherFrame frame = default(DispatcherFrame);
 
-            "Given no background work running".Context(() =>
+            "Given no parallel work running".Context(() =>
             {
                 Assert.False(ParallelWork.IsWorkOrTimerQueued());
                 frame = new DispatcherFrame();
@@ -184,21 +188,21 @@ namespace Test.Utilities
             var test = default(Dictionary<string,string>);
             
             var output = default(Dictionary<string, string>);
-            "When DoWork<> is called".Do(() =>
+            "When StartNow<> is called".Do(() =>
             {
-                ParallelWork.DoWork<Dictionary<string, string>>(
-                    () =>
-                    {                        
-                        test = new Dictionary<string,string>();
+                Start<Dictionary<string, string>>.Work(() =>
+                    {
+                        test = new Dictionary<string, string>();
                         test.Add("test", "test");
 
                         return test;
-                    },
-                    (result) =>
+                    })
+                    .OnComplete((result) =>
                     {
                         output = result;
                         frame.Continue = false;
-                    });
+                    })
+                    .Run();
             });
 
             @"It should return the object produced in separate thread 
@@ -225,7 +229,7 @@ namespace Test.Utilities
 
             DispatcherFrame frame = default(DispatcherFrame);
 
-            "Given no background work running".Context(() =>
+            "Given no parallel work running".Context(() =>
             {
                 Assert.False(ParallelWork.IsAnyWorkRunning());
                 frame = new DispatcherFrame();
@@ -234,20 +238,19 @@ namespace Test.Utilities
                 workCompletedAt = default(DateTime);
             });
 
-            "When DoWorkAfter is called".Do(() =>
+            "When Start.Work().RunAfter() is called".Do(() =>
             {
-                ParallelWork.DoWorkAfter(
-                    () =>
+                Start.Work(() =>
                     {
                         workStartedAt = DateTime.Now;
                         Thread.Sleep(howLongWorkTakes);
-                    },
-                    () =>
+                    })
+                    .OnComplete(() =>
                     {
                         workCompletedAt = DateTime.Now;
                         frame.Continue = false;
-                    },
-                    waitDuration);
+                    })
+                    .RunAfter(waitDuration);
 
                 countDownStartedAt = DateTime.Now;
             });
@@ -297,27 +300,29 @@ namespace Test.Utilities
             "Given some parallel work running".Context(() =>
                 {
                     frame = new DispatcherFrame();
-                    ParallelWork.DoWork(() =>
-                    {
-                        work1StartedAt = DateTime.Now;
-                        Thread.Sleep(howLongWorkTakes);
-                        work1EndedAt = DateTime.Now;
-                    },
-                    () =>
-                    {
-                        frame.Continue = false;
-                    });
+                    Start.Work(() =>
+                        {
+                            work1StartedAt = DateTime.Now;
+                            Thread.Sleep(howLongWorkTakes);
+                            work1EndedAt = DateTime.Now;
+                        })
+                        .OnComplete(() =>
+                        {
+                            frame.Continue = false;
+                        })
+                        .Run();
 
-                    ParallelWork.DoWork(() =>
-                    {
-                        work2StartedAt = DateTime.Now;
-                        Thread.Sleep(howLongWorkTakes);
-                        work2EndedAt = DateTime.Now;
-                    },
-                    () =>
-                    {
-                        frame.Continue = false;
-                    });
+                    Start.Work(() =>
+                        {
+                            work2StartedAt = DateTime.Now;
+                            Thread.Sleep(howLongWorkTakes);
+                            work2EndedAt = DateTime.Now;
+                        })
+                        .OnComplete(() =>
+                        {
+                            frame.Continue = false;
+                        })
+                        .Run();
                 });
 
             "When StopAllWork is called".Do(() =>
@@ -396,24 +401,6 @@ namespace Test.Utilities
         //        Assert.True(WaitForWorkDoneAndFireCallback(timeout, frame));
         //    });
         //}
-
-        public void TestFluent()
-        {
-            Start.Work(() =>
-                    {
-                    })
-                .OnComplete(() =>
-                    {
-                    })
-                .OnException((x) =>
-                    {
-                    })
-                .OnProgress((msg, progress) =>
-                    {
-                    })
-                .Now();
-        }
-
 
         private bool WaitForWorkDoneAndFireCallback(TimeSpan timeout, DispatcherFrame frame)
         {

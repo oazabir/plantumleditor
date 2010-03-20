@@ -26,6 +26,8 @@ namespace PlantUmlEditor
     /// </summary>
     public partial class DiagramViewControl : UserControl
     {
+        private bool _RefreshDiagramTimerStarted = false;
+
         private Weak<MenuItem> _LastMenuItemClicked = default(Weak<MenuItem>);
 
         public DiagramViewControl()
@@ -65,6 +67,8 @@ namespace PlantUmlEditor
 
             if (this.CurrentDiagram == default(DiagramFile))
                 return;
+
+            _RefreshDiagramTimerStarted = false;
 
             var diagramFileName = this.CurrentDiagram.DiagramFilePath;
             var pathForContentEditor = ContentEditor.Tag as string;
@@ -126,7 +130,8 @@ namespace PlantUmlEditor
                     OnAfterSave(this.CurrentDiagram);
                     MessageBox.Show(Window.GetWindow(this), exception.Message, "Error running PlantUml",
                                     MessageBoxButton.OK, MessageBoxImage.Error);
-                });
+                })
+                .Run();
         }
 
         private void CloseDiagram_Click(object sender, RoutedEventArgs e)
@@ -154,8 +159,9 @@ namespace PlantUmlEditor
         {
             if (AutoRefreshCheckbox.IsChecked.Value)
             {
-                if (!ParallelWork.IsAnyWorkRunning())
+                if (!_RefreshDiagramTimerStarted)
                 {
+                    _RefreshDiagramTimerStarted = true;
                     ParallelWork.StartAfter(SaveAndRefreshDiagram, 
                                                TimeSpan.FromSeconds(
                                                    int.Parse(RefreshSecondsTextBox.Text)));

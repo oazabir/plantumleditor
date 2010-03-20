@@ -138,7 +138,8 @@ namespace PlantUmlEditor
                     MessageBox.Show(this, exception.Message, "Error loading files", 
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     this.StopProgress(exception.Message);
-                });
+                })
+                .Run();
         }
 
         private void RefreshDiagramList_Click(object sender, RoutedEventArgs e)
@@ -205,13 +206,33 @@ namespace PlantUmlEditor
         private void StartProgress(string message)
         {
             this.StatusMessage.Text = message;
+            this.StatusProgressBar.IsIndeterminate = true;
             this.StatusProgressBar.Visibility = Visibility.Visible;
+        }
+
+        private void StartProgress(string message, int percentage)
+        {
+            this.StatusMessage.Text = message;
+
+            With.A<ProgressBar>(this.StatusProgressBar, (p) =>
+                {
+                    p.IsIndeterminate = false;
+                    p.Visibility = Visibility.Visible;
+                    p.Minimum = 0;
+                    p.Maximum = 100;
+                    p.Value = percentage;
+                });
         }
 
         private void StopProgress(string message)
         {
             this.StatusMessage.Text = message;
-            this.StatusProgressBar.Visibility = Visibility.Hidden;
+            With.A<ProgressBar>(this.StatusProgressBar, (p) =>
+                {
+                    p.Visibility = Visibility.Hidden;
+                    p.IsIndeterminate = false;
+                    p.Value = 0;
+                });            
         }
 
         private void CreateNewDiagram_Click(object sender, RoutedEventArgs e)
@@ -327,7 +348,8 @@ namespace PlantUmlEditor
                     "Download failed",
                     MessageBoxButton.OK,
                     MessageBoxImage.Exclamation);
-            });
+            })
+            .Run();
 
             UpdateChecker.DownloadCompleted = new Action<AsyncCompletedEventArgs>((e) =>
             {

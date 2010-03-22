@@ -279,14 +279,39 @@ namespace Utilities
 
     public class Start
     {
-        private Action workHandler;
+        private Func<Action<object, string, int>, object> workHandlerWithProgress;
         private Action successHandler = () => { };
         private Action<Exception> exceptionHandler = (x) => { };
         private Action<string, int> progressHandler = (msg, progress) => { } ;
 
         public static Start Work(Action callback)
         {
-            return new Start { workHandler = callback };
+            return new Start 
+            { 
+                workHandlerWithProgress = 
+                    (onprogress) => 
+                    { 
+                        callback(); 
+                        return new object(); 
+                    } 
+            };
+        }
+
+        public static Start Work(Action<Action<string,int>> callback)
+        {
+            return new Start
+            {
+                workHandlerWithProgress =
+                    (onprogress) =>
+                    {
+                        callback((msg, progress) => 
+                        { 
+                            onprogress(default(object), msg, progress); 
+                        });
+
+                        return new object();
+                    }
+            };
         }
 
         public Start OnComplete(Action callback)
@@ -310,7 +335,11 @@ namespace Utilities
         public void Run()
         {
             ParallelWork.StartNow<object, object>(new object(),
-                (o, progressCallback) => { this.workHandler(); return new object(); },
+                (o, progressCallback) => 
+                { 
+                    this.workHandlerWithProgress(progressCallback); 
+                    return new object(); 
+                },
                 (o, msg, done) => { this.progressHandler(msg, done); },
                 (o, result) => { this.successHandler(); },
                 (o, x) => { this.exceptionHandler(x); });
@@ -319,7 +348,11 @@ namespace Utilities
         public void RunAfter(TimeSpan duration)
         {
             ParallelWork.StartAfter<object, object>(new object(),
-                (o, progressCallback) => { this.workHandler(); return new object(); },
+                (o, progressCallback) => 
+                { 
+                    this.workHandlerWithProgress(progressCallback); 
+                    return new object(); 
+                },
                 (o, msg, done) => { this.progressHandler(msg, done); },
                 (o, result) => { this.successHandler(); },
                 (o, x) => { this.exceptionHandler(x); },
@@ -386,7 +419,13 @@ namespace Utilities
 
         public static Start<R> Work(Func<R> callback)
         {
-            return new Start<R> { workHandlerWithProgress = (onprogress) => { return callback(); } };
+            return new Start<R> 
+            { 
+                workHandlerWithProgress = (onprogress) => 
+                { 
+                    return callback(); 
+                } 
+            };
         }
 
         public static Start<R> Work(Func<Action<string,int>, R> callback)

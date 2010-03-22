@@ -11,5 +11,10 @@ namespace Utilities
         {
             work(item);
         }
+
+        public static void Use<T>(this T item, Action<T> work)
+        {
+            work(item);
+        }
     }
 }

@@ -298,52 +298,102 @@ namespace Test.Utilities
             DispatcherFrame frame = default(DispatcherFrame);
             
             "Given some parallel work running".Context(() =>
-                {
-                    frame = new DispatcherFrame();
-                    Start.Work(() =>
-                        {
-                            work1StartedAt = DateTime.Now;
-                            Thread.Sleep(howLongWorkTakes);
-                            work1EndedAt = DateTime.Now;
-                        })
-                        .OnComplete(() =>
-                        {
-                            frame.Continue = false;
-                        })
-                        .Run();
+            {
+                frame = new DispatcherFrame();
+                Start.Work(() =>
+                    {
+                        work1StartedAt = DateTime.Now;
+                        Thread.Sleep(howLongWorkTakes);
+                        work1EndedAt = DateTime.Now;
+                    })
+                    .OnComplete(() =>
+                    {
+                        frame.Continue = false;
+                    })
+                    .Run();
 
-                    Start.Work(() =>
-                        {
-                            work2StartedAt = DateTime.Now;
-                            Thread.Sleep(howLongWorkTakes);
-                            work2EndedAt = DateTime.Now;
-                        })
-                        .OnComplete(() =>
-                        {
-                            frame.Continue = false;
-                        })
-                        .Run();
-                });
+                Start.Work(() =>
+                    {
+                        work2StartedAt = DateTime.Now;
+                        Thread.Sleep(howLongWorkTakes);
+                        work2EndedAt = DateTime.Now;
+                    })
+                    .OnComplete(() =>
+                    {
+                        frame.Continue = false;
+                    })
+                    .Run();
+            });
 
             "When StopAllWork is called".Do(() =>
-                {
-                    // Let the work be half way through
-                    Thread.Sleep((int)howLongWorkTakes.TotalMilliseconds / 2);
-                    ParallelWork.StopAll();
-                });
+            {
+                // Let the work be half way through
+                Thread.Sleep((int)howLongWorkTakes.TotalMilliseconds / 2);
+                ParallelWork.StopAll();
+            });
 
             "It should stop all work from completing".Assert(() =>
-                {   
-                    // Confirm the work started
-                    Assert.NotEqual(default(DateTime), work1StartedAt);
-                    Assert.NotEqual(default(DateTime), work2StartedAt);
-                    
-                    // Confirm the work did not end
-                    Assert.Equal(default(DateTime), work1EndedAt);
-                    Assert.Equal(default(DateTime), work2EndedAt);
+            {   
+                // Confirm the work started
+                Assert.NotEqual(default(DateTime), work1StartedAt);
+                Assert.NotEqual(default(DateTime), work2StartedAt);
+                
+                // Confirm the work did not end
+                Assert.Equal(default(DateTime), work1EndedAt);
+                Assert.Equal(default(DateTime), work2EndedAt);
 
-                    Thread.Sleep(timeout);
-                });
+                Thread.Sleep(timeout);
+            });
+        }
+
+
+        [Specification]
+        [STAThread]
+        public void Should_fire_onprogress_on_UI_thread()
+        {
+            var onprogressMessages = new List<string>();
+            var callerThreadId = default(int);
+            var onprogressCalledOnThreadId = default(int);
+            var frame = default(DispatcherFrame);
+
+            "Given no parallel work running".Context(() =>
+            {
+                Assert.False(ParallelWork.IsWorkOrTimerQueued());
+                callerThreadId = Thread.CurrentThread.ManagedThreadId;
+                onprogressCalledOnThreadId = default(int);
+                frame = new DispatcherFrame();
+            });
+
+            Func<int, string> getMessage = (progress) => "Message " + progress.ToString();
+
+            "When a parallel work is queued and onprogress callback is fired".Do(() =>
+            {
+                Start.Work((onprogress) =>
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            Thread.Sleep(100);
+                            onprogress(getMessage(i), i);
+                        }
+                    })
+                    .OnProgress((msg, progress) =>
+                    {
+                        onprogressCalledOnThreadId = Thread.CurrentThread.ManagedThreadId;
+                        onprogressMessages.Add(msg);
+                    })
+                    .OnComplete(() =>
+                    {
+                        frame.Continue = false;
+                    })
+                    .Run();
+            });
+
+            "It should fire onprogress callback on the UI thread".Assert(() =>
+            {
+                WaitForWorkDoneAndFireCallback(TimeSpan.FromSeconds(5), frame);
+                Assert.Equal(10, onprogressMessages.Count);
+                Assert.Equal(callerThreadId, onprogressCalledOnThreadId);
+            });
         }
 
         //[Specification]
@@ -416,5 +466,6 @@ namespace Test.Utilities
                 return false;
             }
         }
+
     }
 }

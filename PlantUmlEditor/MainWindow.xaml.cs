@@ -95,11 +95,14 @@ namespace PlantUmlEditor
             this.StartProgress("Loading diagrams...");
 
             var listbox = new Weak<ListBox>(this.DiagramFileListBox);
-            Start<List<DiagramFile>>.Work(() =>
+            Start<List<DiagramFile>>.Work((onprogress) =>
                 {
                     var diagrams = new List<DiagramFile>();
-            
-                    foreach (string file in Directory.GetFiles(path))
+
+                    var files = Directory.GetFiles(path);
+                    var numberOfFiles = files.Length;
+                    var processed = 0;
+                    foreach (string file in files)
                     {
                         string content = File.ReadAllText(file);
                         if (content.Length > 0)
@@ -121,10 +124,19 @@ namespace PlantUmlEditor
                                                         System.IO.Path.Combine(path, imageFileName))
                                                   });
                             }
+
+                            processed ++;
+                            onprogress(string.Format("Loading {0} of {1}", processed, numberOfFiles),
+                                (int)((double)processed / (double)numberOfFiles * 100));
+                            Thread.Sleep(50);
                         }
                     }
 
                     return diagrams;
+                })
+                .OnProgress((msg, progress) =>
+                {
+                    this.StartProgress(msg, progress);
                 })
                 .OnComplete((diagrams) =>
                 {                   
@@ -214,25 +226,25 @@ namespace PlantUmlEditor
         {
             this.StatusMessage.Text = message;
 
-            With.A<ProgressBar>(this.StatusProgressBar, (p) =>
-                {
-                    p.IsIndeterminate = false;
-                    p.Visibility = Visibility.Visible;
-                    p.Minimum = 0;
-                    p.Maximum = 100;
-                    p.Value = percentage;
-                });
+            this.StatusProgressBar.Use(p =>
+            {
+                p.IsIndeterminate = false;
+                p.Visibility = Visibility.Visible;
+                p.Minimum = 0;
+                p.Maximum = 100;
+                p.Value = percentage;
+            });
         }
 
         private void StopProgress(string message)
         {
             this.StatusMessage.Text = message;
-            With.A<ProgressBar>(this.StatusProgressBar, (p) =>
-                {
-                    p.Visibility = Visibility.Hidden;
-                    p.IsIndeterminate = false;
-                    p.Value = 0;
-                });            
+            this.StatusProgressBar.Use(p =>
+            {
+                p.Visibility = Visibility.Hidden;
+                p.IsIndeterminate = false;
+                p.Value = 0;
+            });            
         }
 
         private void CreateNewDiagram_Click(object sender, RoutedEventArgs e)

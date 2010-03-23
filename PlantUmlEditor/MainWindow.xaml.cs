@@ -104,31 +104,39 @@ namespace PlantUmlEditor
                     var processed = 0;
                     foreach (string file in files)
                     {
-                        string content = File.ReadAllText(file);
-                        if (content.Length > 0)
+                        try
                         {
-                            string firstLine = content.Substring(0, 
-                                content.IndexOf(Environment.NewLine[0]));
-                            if (firstLine.StartsWith("@startuml"))
+                            string content = File.ReadAllText(file);
+                            if (content.Length > 0)
                             {
-                                string imageFileName = firstLine.Substring(content.IndexOf(' ') + 1)
-                                    .TrimStart('"').TrimEnd('"');
+                                string firstLine = content.Substring(0,
+                                    content.IndexOf(Environment.NewLine[0]));
+                                if (firstLine.StartsWith("@startuml"))
+                                {
+                                    string imageFileName = firstLine.Substring(content.IndexOf(' ') + 1)
+                                        .TrimStart('"').TrimEnd('"');
 
-                                diagrams.Add(new DiagramFile{
-                                                      Content = content,
-                                                      DiagramFilePath = file,
-                                                      ImageFilePath =
-                                                  System.IO.Path.IsPathRooted(imageFileName) ? 
-                                                    System.IO.Path.GetFullPath(imageFileName)
-                                                    : System.IO.Path.GetFullPath(
-                                                        System.IO.Path.Combine(path, imageFileName))
-                                                  });
+                                    diagrams.Add(new DiagramFile
+                                    {
+                                        Content = content,
+                                        DiagramFilePath = file,
+                                        ImageFilePath =
+                                    System.IO.Path.IsPathRooted(imageFileName) ?
+                                      System.IO.Path.GetFullPath(imageFileName)
+                                      : System.IO.Path.GetFullPath(
+                                          System.IO.Path.Combine(path, imageFileName))
+                                    });
+                                }
+
+                                processed++;
+                                onprogress(string.Format("Loading {0} of {1}", processed, numberOfFiles),
+                                    (int)((double)processed / (double)numberOfFiles * 100));
+                                Thread.Sleep(50);
                             }
-
-                            processed ++;
-                            onprogress(string.Format("Loading {0} of {1}", processed, numberOfFiles),
-                                (int)((double)processed / (double)numberOfFiles * 100));
-                            Thread.Sleep(50);
+                        }
+                        catch (Exception x)
+                        {
+                            Debug.WriteLine(x);
                         }
                     }
 

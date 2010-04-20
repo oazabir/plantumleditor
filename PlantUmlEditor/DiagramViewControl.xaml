@@ -21,14 +21,32 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
         <RowDefinition Height="*" />
       </Grid.RowDefinitions>
       
-      <Grid Grid.Row="0" VerticalAlignment="Stretch">
+      <Grid Grid.Row="0" VerticalAlignment="Stretch" Opacity="0.8">
         <Grid.RowDefinitions>
+          <RowDefinition Height="30"></RowDefinition>
           <RowDefinition Height="*"></RowDefinition>
           <RowDefinition Height="38"></RowDefinition>
         </Grid.RowDefinitions>
         
+        <Border Grid.Row="0" Background="Black" VerticalAlignment="Center">
+          <WrapPanel>
+            <TextBlock VerticalAlignment="Center">Search</TextBlock>
+            <TextBox x:Name="SearchTextBox" Width="100" ></TextBox>
+            <Button Style="{DynamicResource BlackButtonStyle}" 
+              Height="Auto" 
+              x:Name="SearchButton"
+              Click="SearchButton_Click">Search</Button>
+            <TextBlock VerticalAlignment="Center">Replace</TextBlock>
+            <TextBox x:Name="ReplaceTextBox" Width="100" ></TextBox>
+            <Button Style="{DynamicResource BlackButtonStyle}" 
+              Height="Auto" 
+              x:Name="ReplaceButton"
+              Click="ReplaceButton_Click">Replace</Button>
+          </WrapPanel>
+        </Border>
+        
         <avalonEdit:TextEditor 
-          Grid.Row="0"
+          Grid.Row="1"
         x:Name="ContentEditor" 
         HorizontalAlignment="Stretch" 
         VerticalAlignment="Stretch" 
@@ -36,16 +54,14 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
         FontSize="11pt"
         Background="Black"
         Foreground="LightYellow"
-        Opacity="0.8"
         Text=""
         Padding="10"
         TextChanged="ContentEditor_TextChanged" KeyUp="ContentEditor_KeyUp">        
         </avalonEdit:TextEditor>
         
         <Border 
-          Grid.Row="1"
+          Grid.Row="2"
         Background="Black" 
-        Opacity="0.8"
           Height="40"
           >
           <WrapPanel Margin="4">
@@ -597,13 +613,13 @@ end note
             <CheckBox x:Name="AutoRefreshCheckbox"
             VerticalAlignment="Center" 
             IsChecked="True" >
-              <TextBlock >Auto Refresh every</TextBlock>
+              <TextBlock >Refresh</TextBlock>
             </CheckBox>
             <TextBlock Width="10" ></TextBlock>
             <TextBox VerticalAlignment="Center" 
             MaxWidth="30"
-            x:Name="RefreshSecondsTextBox">5</TextBox>
-            <TextBlock VerticalAlignment="Center" > Seconds</TextBlock>
+            x:Name="RefreshSecondsTextBox">10</TextBox>
+            <TextBlock VerticalAlignment="Center"> Secs</TextBlock>
             <TextBlock Width="10" ></TextBlock>
             <Slider x:Name="ZoomSlider"
             Minimum="0.1"
@@ -641,8 +657,11 @@ end note
                           Click="CopyToClipboard_Click"></MenuItem>
                 <MenuItem Style="{DynamicResource MenuItemStyle}" 
                           Header="Open in explorer" 
-                          Click="OpenInExplorer_Click"></MenuItem>                
-              </ContextMenu>
+                          Click="OpenInExplorer_Click"></MenuItem>
+                <MenuItem Style="{DynamicResource MenuItemStyle}" 
+                          Header="Copy path" 
+                          Click="CopyPath_Click"></MenuItem>
+                            </ContextMenu>
             </Image.ContextMenu>
             <Image.RenderTransform>
               <TransformGroup>

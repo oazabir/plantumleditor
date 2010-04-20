@@ -32,6 +32,7 @@ namespace PlantUmlEditor
     using PlantUmlEditor.CustomAnimation;
     using Utilities;
     using PlantUmlEditor.Properties;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// MainWindow that hosts the diagram list box and the editing environment.
@@ -42,7 +43,7 @@ namespace PlantUmlEditor
 
         private ObservableCollection<DiagramFile> _DiagramFiles = new ObservableCollection<DiagramFile>();
         private ObservableCollection<DiagramFile> _OpenDiagrams = new ObservableCollection<DiagramFile>();
-        
+
         protected GridLength LeftColumnLastWidthBeforeAnimation
         {
             get;
@@ -51,10 +52,10 @@ namespace PlantUmlEditor
 
         public MainWindow()
         {
-            InitializeComponent();            
+            InitializeComponent();
 
             this.DiagramFileListBox.ItemsSource = null;
-            this.DiagramTabs.ItemsSource = null;            
+            this.DiagramTabs.ItemsSource = null;
         }
 
         private void DiagramLocationTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -76,14 +77,14 @@ namespace PlantUmlEditor
             using (var dlg = new System.Windows.Forms.FolderBrowserDialog())
             {
                 dlg.ShowNewFolderButton = true;
-                System.Windows.Forms.DialogResult result = 
+                System.Windows.Forms.DialogResult result =
                 dlg.ShowDialog(
-                    new OldWindow( 
+                    new OldWindow(
                         new WindowInteropHelper(this).Handle));
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
                     this.DiagramLocationTextBox.Text = dlg.SelectedPath;
-                    this.LoadDiagramFiles(dlg.SelectedPath, () => {});
+                    this.LoadDiagramFiles(dlg.SelectedPath, () => { });
                 }
             }
         }
@@ -94,7 +95,7 @@ namespace PlantUmlEditor
             
             this.StartProgress("Loading diagrams...");
 
-            var listbox = new Weak<ListBox>(this.DiagramFileListBox);
+            Weak<ListBox> listbox = this.DiagramFileListBox;
             Start<List<DiagramFile>>.Work((onprogress) =>
                 {
                     var diagrams = new List<DiagramFile>();
@@ -109,12 +110,16 @@ namespace PlantUmlEditor
                             string content = File.ReadAllText(file);
                             if (content.Length > 0)
                             {
-                                string firstLine = content.Substring(0,
-                                    content.IndexOf(Environment.NewLine[0]));
-                                if (firstLine.StartsWith("@startuml"))
+                                //string firstLine = content.Substring(0,500);
+                                Match match = Regex.Match(content, @"@startuml\s*(?:"")*([^\r\n""]*)", 
+                                        RegexOptions.IgnoreCase
+                                        | RegexOptions.Multiline
+                                        | RegexOptions.IgnorePatternWhitespace
+                                        | RegexOptions.Compiled
+                                        );
+                                if (match.Success && match.Groups.Count > 1)
                                 {
-                                    string imageFileName = firstLine.Substring(content.IndexOf(' ') + 1)
-                                        .TrimStart('"').TrimEnd('"');
+                                    string imageFileName = match.Groups[1].Value;
 
                                     diagrams.Add(new DiagramFile
                                     {
@@ -164,14 +169,14 @@ namespace PlantUmlEditor
 
         private void RefreshDiagramList_Click(object sender, RoutedEventArgs e)
         {
-            this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, () => {});
+            this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, () => { });
         }
 
         private void DiagramLocationTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (Directory.Exists(this.DiagramLocationTextBox.Text))
             {
-                this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, () => {});
+                this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, () => { });
             }
         }
 
@@ -191,8 +196,8 @@ namespace PlantUmlEditor
                 this.DiagramTabs.Visibility = Visibility.Visible;
                 this.WelcomePanel.Visibility = Visibility.Hidden;
             }
-            
-            this.DiagramTabs.SelectedItem = diagramFile;            
+
+            this.DiagramTabs.SelectedItem = diagramFile;
         }
 
         private void DiagramFileListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -252,7 +257,7 @@ namespace PlantUmlEditor
                 p.Visibility = Visibility.Hidden;
                 p.IsIndeterminate = false;
                 p.Value = 0;
-            });            
+            });
         }
 
         private void CreateNewDiagram_Click(object sender, RoutedEventArgs e)
@@ -263,7 +268,7 @@ namespace PlantUmlEditor
         private void StartNewDiagram()
         {
             SaveFileDialog dlg = new SaveFileDialog();
-            
+
             dlg.DefaultExt = "*.txt";
             dlg.Filter = "Diagram text files (*.txt)|*.txt";
             dlg.AddExtension = true;
@@ -273,14 +278,14 @@ namespace PlantUmlEditor
                 File.WriteAllText(diagramFileName, string.Format(
                     "@startuml \"{0}\"" + Environment.NewLine
                     + Environment.NewLine
-                    + Environment.NewLine 
-                    + "@enduml", 
+                    + Environment.NewLine
+                    + "@enduml",
                     System.IO.Path.GetFileNameWithoutExtension(diagramFileName) + ".png"));
 
                 this.DiagramLocationTextBox.Text = System.IO.Path.GetDirectoryName(diagramFileName);
                 Weak<ListBox> listbox = this.DiagramFileListBox;
-                this.LoadDiagramFiles(this.DiagramLocationTextBox.Text, 
-                                      () => 
+                this.LoadDiagramFiles(this.DiagramLocationTextBox.Text,
+                                      () =>
                                       {
                                           var diagramOnList = this._DiagramFiles.First(
                                               d => d.DiagramFilePath == diagramFileName);
@@ -288,14 +293,14 @@ namespace PlantUmlEditor
                                           diagramListBox.SelectedItem = diagramOnList;
                                           this.OpenDiagramFile(diagramOnList);
                                       });
-            }            
+            }
         }
 
         private void DiagramView_GotFocus(object sender, RoutedEventArgs e)
-        {            
+        {
             if (this.LeftColumn.ActualWidth > this.LeftColumnLastWidthBeforeAnimation.Value)
                 this.LeftColumnLastWidthBeforeAnimation = new GridLength(this.LeftColumn.ActualWidth);
-            ((Storyboard)this.Resources["CollapseTheDiagramListBox"]).Begin(this, true);                        
+            ((Storyboard)this.Resources["CollapseTheDiagramListBox"]).Begin(this, true);
         }
 
         private void DiagramView_LostFocus(object sender, RoutedEventArgs e)
@@ -317,7 +322,7 @@ namespace PlantUmlEditor
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PlantUmlEditor\\samples\\");
 
             // After a while check for new version
-            ParallelWork.StartAfter(CheckForUpdate, TimeSpan.FromMinutes(1));            
+            ParallelWork.StartAfter(CheckForUpdate, TimeSpan.FromMinutes(1));
         }
 
         /// <summary>
@@ -327,9 +332,9 @@ namespace PlantUmlEditor
         private void CheckForUpdate()
         {
             var me = new Weak<Window>(this);
-            
+
             // Check if there's a newer version of the app
-            Start<bool>.Work(() => 
+            Start<bool>.Work(() =>
             {
                 return UpdateChecker.HasUpdate(Settings.Default.DownloadUrl);
             })
@@ -343,11 +348,12 @@ namespace PlantUmlEditor
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information) == MessageBoxResult.Yes)
                     {
-                        ParallelWork.StartNow(() => {
+                        ParallelWork.StartNow(() =>
+                        {
                             var tempPath = System.IO.Path.Combine(
                                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                 Settings.Default.SetupExeName);
-        
+
                             UpdateChecker.DownloadLatestUpdate(Settings.Default.DownloadUrl, tempPath);
                         }, () => { },
                             (x) =>
@@ -361,7 +367,7 @@ namespace PlantUmlEditor
                     }
                 }
             })
-            .OnException((x) => 
+            .OnException((x) =>
             {
                 MessageBox.Show(Window.GetWindow(me),
                     x.Message,
@@ -399,12 +405,12 @@ namespace PlantUmlEditor
                 }));
             });
 
-            
+
         }
 
         private void NameHyperlink_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start((e.OriginalSource as Hyperlink).NavigateUri.ToString());                
+            Process.Start((e.OriginalSource as Hyperlink).NavigateUri.ToString());
         }
 
         private bool CheckGraphViz()
@@ -413,7 +419,7 @@ namespace PlantUmlEditor
             if (string.IsNullOrEmpty(graphVizPath))
             {
                 MessageBox.Show(Window.GetWindow(this),
-                    "You haven't either installed GraphViz or you haven't created " + 
+                    "You haven't either installed GraphViz or you haven't created " +
                     Environment.NewLine + "the environment variable name GRAPHVIZ_DOT that points to the dot.exe" +
                     Environment.NewLine + "where GraphViz is installed. Please create and re-run.",
                     "GraphViz Environment variable not found",

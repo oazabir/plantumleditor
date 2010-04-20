@@ -101,7 +101,13 @@ namespace PlantUmlEditor
 
             Start.Work(() =>
                 {
+                    // A Bug in PlantUML which is having problem detecting encoding if the
+                    // first line is not an empty line.
+                    if (!char.IsWhiteSpace(content, 0))
+                        content = Environment.NewLine + content;
+
                     // Save the diagram content
+                    
                     File.WriteAllText(diagramFileName, content, Encoding.UTF8);
 
                     // Use plantuml to generate the graph again                    
@@ -223,6 +229,31 @@ namespace PlantUmlEditor
             if (e.Key == Key.S)
                 if (Keyboard.Modifiers == ModifierKeys.Control)
                     this.SaveAndRefreshDiagram();
+        }
+
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: In progress
+            //this.ContentEditor.Use(c =>
+            //    {
+            //        var textToFind = this.SearchTextBox.Text;
+            //        var pos = c.SelectionStart;
+                    
+            //        if (textPos >= c.SelectionStart)
+            //        {
+            //            c.Select(pos, textToFind.Length);
+            //        }
+            //    });
+        }
+
+        private void ReplaceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CopyPath_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(this.CurrentDiagram.ImageFilePath);
         }
 
     }

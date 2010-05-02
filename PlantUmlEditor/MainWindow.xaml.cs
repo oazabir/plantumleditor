@@ -108,7 +108,8 @@ namespace PlantUmlEditor
                         try
                         {
                             string content = File.ReadAllText(file);
-                            if (content.Length > 0)
+                            
+                            if (content != null && content.Length > 0)
                             {
                                 //string firstLine = content.Substring(0,500);
                                 Match match = Regex.Match(content, @"@startuml\s*(?:"")*([^\r\n""]*)", 
@@ -336,7 +337,18 @@ namespace PlantUmlEditor
             // Check if there's a newer version of the app
             Start<bool>.Work(() =>
             {
-                return UpdateChecker.HasUpdate(Settings.Default.DownloadUrl);
+                var versionFileName = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    Settings.Default.VersionFileName);
+
+                if (File.Exists(versionFileName))
+                {
+                    var localVersion = File.ReadAllText(versionFileName);
+                    return UpdateChecker.HasUpdate(Settings.Default.VersionFileUrl, localVersion);
+                }
+                else
+                {
+                    return true;
+                }
             })
             .OnComplete((hasUpdate) =>
             {

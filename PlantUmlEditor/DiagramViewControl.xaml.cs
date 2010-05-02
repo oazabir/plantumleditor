@@ -147,6 +147,9 @@ namespace PlantUmlEditor
 
         private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            if (DesignerProperties.GetIsInDesignMode(this))
+                return;
+            
             if (e.NewValue != null)
             {
                 var newDiagram = (e.NewValue as DiagramFile);

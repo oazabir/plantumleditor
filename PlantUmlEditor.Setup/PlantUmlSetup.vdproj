@@ -15,13 +15,13 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_7A651751C8945DE0C254BD2C01E4FA05"
+        "MsmKey" = "8:_704C6E4CD4EB5102EEB34A929C988C5B"
         "OwnerKey" = "8:_FC34049DA5A941188640298C743D4171"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_F1E37050F9685E2C03E63CA32BF7980F"
+        "MsmKey" = "8:_D2280DB646674B991B74039B7ECB54E1"
         "OwnerKey" = "8:_FC34049DA5A941188640298C743D4171"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -40,13 +40,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F1E37050F9685E2C03E63CA32BF7980F"
+        "OwnerKey" = "8:_D2280DB646674B991B74039B7ECB54E1"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_7A651751C8945DE0C254BD2C01E4FA05"
+        "OwnerKey" = "8:_704C6E4CD4EB5102EEB34A929C988C5B"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -146,7 +146,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "Version" = "8:3.5.30729"
+                "FrameworkVersion" = "8:3.5.30729"
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=76617"
                 }
@@ -154,14 +154,14 @@
         }
         "File"
         {
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7A651751C8945DE0C254BD2C01E4FA05"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_704C6E4CD4EB5102EEB34A929C988C5B"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:ICSharpCode.AvalonEdit, Version=4.0.0.5048, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_7A651751C8945DE0C254BD2C01E4FA05"
+                    "_704C6E4CD4EB5102EEB34A929C988C5B"
                     {
                     "Name" = "8:ICSharpCode.AvalonEdit.dll"
                     "Attributes" = "3:512"
@@ -185,14 +185,14 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F1E37050F9685E2C03E63CA32BF7980F"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D2280DB646674B991B74039B7ECB54E1"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_F1E37050F9685E2C03E63CA32BF7980F"
+                    "_D2280DB646674B991B74039B7ECB54E1"
                     {
                     "Name" = "8:Utilities.dll"
                     "Attributes" = "3:512"
@@ -305,14 +305,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PlantUMLEditor"
-        "ProductCode" = "8:{96125E2A-EE6F-4E04-8AD7-B254B7304E43}"
-        "PackageCode" = "8:{D43721E2-0C84-465C-8F22-E0E77C22AD3D}"
+        "ProductCode" = "8:{DC87F5D5-B35B-4FD2-B112-42D152768D5D}"
+        "PackageCode" = "8:{CFEA0BDA-0566-4817-BCE7-C7559AD27E76}"
         "UpgradeCode" = "8:{D68405E2-5C22-46A9-864F-0997F080F99F}"
+        "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.2"
+        "ProductVersion" = "8:1.3.0"
         "Manufacturer" = "8:Omar AL Zabir"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://msmvps.com/blogs/omar"

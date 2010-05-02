@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Globalization;
 
 namespace Utilities
 {
@@ -14,22 +15,28 @@ namespace Utilities
         public static Action<System.ComponentModel.AsyncCompletedEventArgs> DownloadCompleted;
         public static string DownloadedLocation;
 
-        public static bool HasUpdate(string downloadUrl)
+        public static bool HasUpdate(string versionUrl, string currentVersion)
         {
-            HttpWebRequest request = WebRequest.Create(downloadUrl) as HttpWebRequest;
-            using (var response = request.GetResponse())
+            using (WebClient client = new WebClient())
             {
-                var lastModifiedDate = default(DateTime);
-                if (DateTime.TryParse(response.Headers["Last-Modified"], out lastModifiedDate))
-                {
-                    var path = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                    var localFileDateTime = File.GetLastWriteTime(path);
-
-                    return (localFileDateTime < lastModifiedDate.AddDays(-1));
-                }
+                var serverVersionBytes = client.DownloadData(versionUrl);
+                var serverVersion = Encoding.Unicode.GetString(Encoding.Convert(
+                    Encoding.UTF8, 
+                    Encoding.Unicode, serverVersionBytes));
+                return string.Compare(serverVersion, currentVersion, true, CultureInfo.InvariantCulture) != 0;
             }
+            //HttpWebRequest request = WebRequest.Create(downloadUrl) as HttpWebRequest;
+            //using (var response = request.GetResponse())
+            //{
+            //    var lastModifiedDate = default(DateTime);
+            //    if (DateTime.TryParse(response.Headers["Last-Modified"], out lastModifiedDate))
+            //    {
+            //        var path = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //        var localFileDateTime = File.GetLastWriteTime(path);
 
-            return false;
+            //        return (localFileDateTime < lastModifiedDate.AddDays(-1));
+            //    }
+            //}
         }
 
         public static void DownloadLatestUpdate(string downloadUrl, string localPath)

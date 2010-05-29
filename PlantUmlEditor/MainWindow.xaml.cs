@@ -77,6 +77,8 @@ namespace PlantUmlEditor
             using (var dlg = new System.Windows.Forms.FolderBrowserDialog())
             {
                 dlg.ShowNewFolderButton = true;
+                dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+                dlg.SelectedPath = this.DiagramLocationTextBox.Text; 
                 System.Windows.Forms.DialogResult result =
                 dlg.ShowDialog(
                     new OldWindow(
@@ -100,7 +102,7 @@ namespace PlantUmlEditor
                 {
                     var diagrams = new List<DiagramFile>();
 
-                    var files = Directory.GetFiles(path);
+                    var files = Directory.GetFiles(path, "*.txt");
                     var numberOfFiles = files.Length;
                     var processed = 0;
                     foreach (string file in files)
@@ -137,7 +139,7 @@ namespace PlantUmlEditor
                                 processed++;
                                 onprogress(string.Format("Loading {0} of {1}", processed, numberOfFiles),
                                     (int)((double)processed / (double)numberOfFiles * 100));
-                                Thread.Sleep(50);
+                                //Thread.Sleep(50);
                             }
                         }
                         catch (Exception x)
@@ -273,6 +275,7 @@ namespace PlantUmlEditor
             dlg.DefaultExt = "*.txt";
             dlg.Filter = "Diagram text files (*.txt)|*.txt";
             dlg.AddExtension = true;
+            dlg.InitialDirectory = this.DiagramLocationTextBox.Text;
             if (dlg.ShowDialog().Value)
             {
                 var diagramFileName = dlg.FileName;
@@ -319,8 +322,9 @@ namespace PlantUmlEditor
                 return;
             }
 
-            this.DiagramLocationTextBox.Text = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PlantUmlEditor\\samples\\");
+            this.DiagramLocationTextBox.Text = string.IsNullOrEmpty(Settings.Default.LastPath) ?
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "PlantUmlEditor\\samples\\") : Settings.Default.LastPath;
 
             // After a while check for new version
             ParallelWork.StartAfter(CheckForUpdate, TimeSpan.FromMinutes(1));
@@ -427,48 +431,54 @@ namespace PlantUmlEditor
 
         private bool CheckGraphViz()
         {
-            var graphVizPath = Environment.GetEnvironmentVariable("GRAPHVIZ_DOT");
+            var graphVizPath = Settings.Default.GraphVizLocation;
             if (string.IsNullOrEmpty(graphVizPath))
-            {
-                MessageBox.Show(Window.GetWindow(this),
-                    "You haven't either installed GraphViz or you haven't created " +
-                    Environment.NewLine + "the environment variable name GRAPHVIZ_DOT that points to the dot.exe" +
-                    Environment.NewLine + "where GraphViz is installed. Please create and re-run.",
-                    "GraphViz Environment variable not found",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                graphVizPath = Environment.GetEnvironmentVariable("GRAPHVIZ_DOT");
 
-                return false;
-            }
-            else
+            if (string.IsNullOrEmpty(graphVizPath) || !File.Exists(graphVizPath))
             {
-                if (!File.Exists(graphVizPath))
+                OpenFileDialog dialog = new OpenFileDialog();
+                dialog.FileName = "dot.exe";
+                dialog.DefaultExt = ".exe";
+                dialog.Filter = "dot.exe|dot.exe";
+                
+                // See if graphviz is there in environment PATH
+                var envPath = Environment.GetEnvironmentVariable("PATH");
+                var paths = envPath.Split(';');
+                dialog.InitialDirectory = paths.Where(p => p.ToLower().Contains("graphviz")).FirstOrDefault();
+                if (dialog.ShowDialog(this.Owner).Value)
                 {
-                    MessageBox.Show(Window.GetWindow(this),
-                        "The path you have set in GRAPHVIZ_DOT is invalid. Please fix.",
-                        "GraphViz path wrong",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-
-                    return false;
+                    Settings.Default.GraphVizLocation = dialog.FileName;
+                    Settings.Default.Save();
+                    return true;
                 }
                 else
                 {
-                    var filename = System.IO.Path.GetFileName(graphVizPath);
-                    if (filename.ToLower() != "dot.exe")
-                    {
-                        MessageBox.Show(Window.GetWindow(this),
-                            "The path you have set in GRAPHVIZ_DOT is not pointing to dot.exe. It has to be dot.exe's path",
-                            "GraphViz path wrong",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-
-                        return false;
-                    }
+                    return false;
                 }
+                
+                //MessageBox.Show(Window.GetWindow(this),
+                //    "You haven't either installed GraphViz or you haven't created " +
+                //    Environment.NewLine + "the environment variable name GRAPHVIZ_DOT that points to the dot.exe" +
+                //    Environment.NewLine + "where GraphViz is installed. Please create and re-run.",
+                //    "GraphViz Environment variable not found",
+                //    MessageBoxButton.OK,
+                //    MessageBoxImage.Warning);
+
+                //return false;
             }
+            
 
             return true;
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (Directory.Exists(this.DiagramLocationTextBox.Text))
+            {
+                Settings.Default.LastPath = this.DiagramLocationTextBox.Text;
+                Settings.Default.Save();
+            }
         }
     }
 }

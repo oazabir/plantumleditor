@@ -28,7 +28,7 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
           <RowDefinition Height="38"></RowDefinition>
         </Grid.RowDefinitions>
         
-        <Border Grid.Row="0" Background="Black" VerticalAlignment="Center">
+        <Border Grid.Row="0" Background="Black" VerticalAlignment="Center" Visibility="Collapsed">
           <WrapPanel>
             <TextBlock VerticalAlignment="Center">Search</TextBlock>
             <TextBox x:Name="SearchTextBox" Width="100" ></TextBox>
@@ -166,6 +166,12 @@ xmlns:plantuml="clr-namespace:PlantUmlEditor" DataContextChanged="UserControl_Da
                       <MenuItem.Tag>
                         <![CDATA[Alice -> Bob: Authentication Request]]>
                       </MenuItem.Tag>
+                    </MenuItem>
+
+                    <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Asynchronous Request">
+                        <MenuItem.Tag>
+                            <![CDATA[Alice ->> Bob: Authentication Request]]>
+                        </MenuItem.Tag>
                     </MenuItem>
 
                     <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Return Message">
@@ -504,6 +510,17 @@ end note
                   </MenuItem>
 
                   <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Class">
+                    <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Sample Class">
+                        <MenuItem.Tag>
+                                                <![CDATA[class Dummy {
+ -field1
+ #field2
+ ~method1()
+ +method2()
+}]]>
+                        </MenuItem.Tag>
+                    </MenuItem>
+                      
                     <MenuItem Style="{DynamicResource MenuItemStyle}" Header="Generalization">
                       <MenuItem.Tag>
                         <![CDATA[Human <|-- Student]]>

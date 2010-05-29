@@ -26,6 +26,7 @@ namespace PlantUmlEditor
     /// </summary>
     public partial class DiagramViewControl : UserControl
     {
+        private bool _FirstSaveAfterOpen = false;
         private bool _RefreshDiagramTimerStarted = false;
 
         private Weak<MenuItem> _LastMenuItemClicked = default(Weak<MenuItem>);
@@ -47,6 +48,8 @@ namespace PlantUmlEditor
         public event Action<DiagramFile> OnAfterSave;
         public event Action<DiagramFile> OnClose;
         
+
+
         private DiagramFile CurrentDiagram
         {
             get
@@ -82,6 +85,14 @@ namespace PlantUmlEditor
                 return;
             }
 
+            // Take a backup if this is the first time the diagram being modified
+            // after opening
+            if (_FirstSaveAfterOpen)
+            {
+                File.Copy(diagramFileName, diagramFileName.Replace(new FileInfo(diagramFileName).Extension, ".bak"), true);
+                _FirstSaveAfterOpen = false;
+            }
+
             var content = ContentEditor.Text; 
             this.CurrentDiagram.Content = content;
 
@@ -106,8 +117,9 @@ namespace PlantUmlEditor
                     if (!char.IsWhiteSpace(content, 0))
                         content = Environment.NewLine + content;
 
-                    // Save the diagram content
-                    
+                    // Save the diagram content using UTF-8 encoding to support 
+                    // various international characters, which ASCII won't support
+                    // and Unicode won't make it cross platform
                     File.WriteAllText(diagramFileName, content, Encoding.UTF8);
 
                     // Use plantuml to generate the graph again                    
@@ -115,7 +127,7 @@ namespace PlantUmlEditor
                     {
                         var startInfo = new ProcessStartInfo();
                         startInfo.FileName = plantUmlPath;
-                        startInfo.Arguments = "\"" + diagramFileName + "\"";
+                        startInfo.Arguments = "-graphvizdot \"" + Settings.Default.GraphVizLocation + "\" \"" + diagramFileName + "\"";
                         startInfo.WindowStyle = ProcessWindowStyle.Hidden; // OMAR: Trick #5
                         startInfo.CreateNoWindow = true; // OMAR: Trick #5
                         process.StartInfo = startInfo;
@@ -155,6 +167,10 @@ namespace PlantUmlEditor
                 var newDiagram = (e.NewValue as DiagramFile);
                 ContentEditor.Text = newDiagram.Content;
                 ContentEditor.Tag = newDiagram.DiagramFilePath;
+
+                // The document has been opened first time. So, any changes
+                // made to the document will require creating a backup.
+                _FirstSaveAfterOpen = true;
             }            
 
             if (this._LastMenuItemClicked != default(Weak<MenuItem>))

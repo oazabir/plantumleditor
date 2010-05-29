@@ -146,7 +146,7 @@
                 {
                 "Name" = "8:.NET Framework"
                 "Message" = "8:[VSDNETMSG]"
-                "FrameworkVersion" = "8:3.5.30729"
+                "FrameworkVersion" = "8:3.5.30729     "
                 "AllowLaterVersions" = "11:FALSE"
                 "InstallUrl" = "8:http://go.microsoft.com/fwlink/?LinkId=76617"
                 }
@@ -305,15 +305,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PlantUMLEditor"
-        "ProductCode" = "8:{DC87F5D5-B35B-4FD2-B112-42D152768D5D}"
-        "PackageCode" = "8:{CFEA0BDA-0566-4817-BCE7-C7559AD27E76}"
+        "ProductCode" = "8:{A6B774B0-0156-4550-8BAF-CA8B5BDFB970}"
+        "PackageCode" = "8:{5310AFDB-0444-449D-9DED-531B222E71B0}"
         "UpgradeCode" = "8:{D68405E2-5C22-46A9-864F-0997F080F99F}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.3.0"
+        "ProductVersion" = "8:1.4.1"
         "Manufacturer" = "8:Omar AL Zabir"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:http://msmvps.com/blogs/omar"

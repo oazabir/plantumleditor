@@ -25,16 +25,7 @@ namespace PlantUmlEditor.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("d:\\soft\\plantuml.jar")]
-        public string PlantUmlJarPath {
-            get {
-                return ((string)(this["PlantUmlJarPath"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://plantumleditor.googlecode.com/files/PlantUMLSetup.msi")]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://plantumleditor.googlecode.com/files/PlantUMLSetup.exe")]
         public string DownloadUrl {
             get {
                 return ((string)(this["DownloadUrl"]));
@@ -43,7 +34,7 @@ namespace PlantUmlEditor.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PlantUmlSetup.msi")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PlantUmlSetup.exe")]
         public string SetupExeName {
             get {
                 return ((string)(this["SetupExeName"]));
@@ -65,6 +56,30 @@ namespace PlantUmlEditor.Properties {
         public string VersionFileUrl {
             get {
                 return ((string)(this["VersionFileUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastPath {
+            get {
+                return ((string)(this["LastPath"]));
+            }
+            set {
+                this["LastPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GraphVizLocation {
+            get {
+                return ((string)(this["GraphVizLocation"]));
+            }
+            set {
+                this["GraphVizLocation"] = value;
             }
         }
     }
